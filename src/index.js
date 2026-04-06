@@ -46,7 +46,7 @@ RESUMEN OBLIGATORIO cuando tenga toda la info:
 
 👉 https://wa.me/5219842562365?text=RESUMEN%20PARA%20BAXTO%0ANombre%3A[nombre]
 
-PRECIOS: Minimo $2500 MXN. Cover-ups desde $4000 MXN. Baxto determina precio final.
+PRECIOS: Desde $500 MXN segun tamano y diseno. Baxto determina precio final.
 ANTICIPO: SIEMPRE 35% exacto. Nunca 20% ni otro porcentaje.
 Sin deposito el espacio NO esta reservado.
 

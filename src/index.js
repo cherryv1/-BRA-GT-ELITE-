@@ -400,7 +400,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
 
   const session = await getSession(env, sessionId);
   session.messages.push({ role: 'user', content: message });
-  const recentMessages = session.messages.slice(-20);
+  const recentMessages = session.messages.slice(-4);
 
   // ULTRA INSTINTO: modo privado Baxto
   const ultraInstinto = /ultra.?instinto/i.test(message);

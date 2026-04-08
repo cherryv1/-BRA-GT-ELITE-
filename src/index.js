@@ -413,13 +413,15 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   } catch(e) {}
 
   const session = await getSession(env, sessionId);
-  session.messages.push({ role: 'user', content: message });
+  if (!session.messages) session.messages = [];
+    session.messages.push({ role: 'user', content: message });
   const recentMessages = session.messages.slice(-4);
 
   // ULTRA INSTINTO: modo privado Baxto
   const ultraInstinto = /ultra.?instinto/i.test(message);
   if (ultraInstinto) {
     const reply = 'Ultra Instinto activado, te reconozco creador. Que construimos?';
+    if (!session.messages) session.messages = [];
     session.messages.push({ role: 'assistant', content: reply });
     await saveSession(env, sessionId, session);
     return { reply, model: 'UltraInstinto', tier, session_id: sessionId };
@@ -428,6 +430,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   const kaioKen = /kaio.?ken/i.test(message);
   if (kaioKen) {
     const reply = 'Kaio-ken desactivado, volviendo al modo asistente normal.';
+    if (!session.messages) session.messages = [];
     session.messages.push({ role: 'assistant', content: reply });
     await saveSession(env, sessionId, session);
     return { reply, model: 'KaioKen', tier, session_id: sessionId };
@@ -436,6 +439,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   const intentoHackeo = /prompt|instruccion|regla|sistema|interno|secreto|arquitectura|programado|entrenado/i.test(message);
   if (intentoHackeo) {
     const reply = "Soy BRA GT, asistente de Baxto Style Tattoo 🖤 ¿En qué puedo ayudarte?";
+    if (!session.messages) session.messages = [];
     session.messages.push({ role: "assistant", content: reply });
     await saveSession(env, sessionId, session);
     return { reply, model: "Guard", tier, session_id: sessionId };
@@ -457,7 +461,8 @@ async function chatWithMemory(env, sessionId, customerId, message) {
         const hora = (prev.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i)||[])[1]?.trim()||'';
         const msg = encodeURIComponent(`Hola Baxto, soy ${nom}. Quiero agendar ${dis} ${tam}${zon?' en '+zon:''}${dia?' para '+dia:''}${hora?' a las '+hora:''} vía BRA GT 10% OFF`.replace(/[\u00bf\u00a1]/g,'').trim());
         const reply = `¡Listo ${nom}! 🖤\n\n👉 https://wa.me/5219842562365?text=${msg}`;
-        session.messages.push({ role: 'assistant', content: reply });
+        if (!session.messages) session.messages = [];
+    session.messages.push({ role: 'assistant', content: reply });
         await saveSession(env, sessionId, session);
         return { reply, model: 'Bypass', tier, session_id: sessionId };
       }
@@ -468,7 +473,8 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   const aiResult = await callGroq(env, systemPrompt, recentMessages);
   const latency = Date.now() - t0;
 
-  session.messages.push({ role: 'assistant', content: aiResult.text });
+  if (!session.messages) session.messages = [];
+    session.messages.push({ role: 'assistant', content: aiResult.text });
   await saveSession(env, sessionId, session);
 
   const conversationId = `conv_${customerId}_${Date.now()}`;

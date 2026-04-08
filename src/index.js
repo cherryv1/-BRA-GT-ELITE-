@@ -824,7 +824,7 @@ async function handleRequest(request, env) {
       const r = await fetch('https://api.github.com/repos/cherryv1/-BLACK-LILY-/actions/workflows/deploy.yml/dispatches', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${env.TOKE_420}`,
+          'Authorization': `Bearer ${env.STYLE_KEY}`,
           'Accept': 'application/vnd.github+json',
           'Content-Type': 'application/json',
           'User-Agent': 'BRA-GT-Dashboard/1.0'

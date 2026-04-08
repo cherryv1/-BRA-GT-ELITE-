@@ -590,6 +590,14 @@ button:hover{background:#7c00cc;box-shadow:0 0 12px rgba(157,0,255,.4);}
   <button onclick="updatePrompt()">Actualizar Prompt</button>
   <div id="status"></div>
 </div>
+<div class="section" style="margin-top:1rem">
+  <h2>🔌 Kill Switch BRA GT</h2>
+  <label style="display:flex;align-items:center;gap:1rem;cursor:pointer">
+    <input type="checkbox" id="ks-toggle" onchange="toggleKillSwitch()" style="width:2rem;height:2rem;cursor:pointer">
+    <span id="ks-label" style="font-size:1.2rem">Cargando...</span>
+  </label>
+  <p style="opacity:.6;font-size:.85rem">OFF = clientes ven mensaje de espera, BRA no responde</p>
+</div>
 <script>
 async function loadMetrics(){
   try{
@@ -620,6 +628,22 @@ async function updatePrompt(){
 }
 loadMetrics();
 setInterval(loadMetrics,30000);
+
+async function loadKillSwitch(){
+  try{
+    const r=await fetch('/admin/kill-switch-status');
+    const d=await r.json();
+    const on=d.active!==false;
+    document.getElementById('ks-toggle').checked=on;
+    document.getElementById('ks-label').textContent=on?'🔵 BRA ON':'⚫ BRA OFF';
+  }catch(e){}
+}
+async function toggleKillSwitch(){
+  const on=document.getElementById('ks-toggle').checked;
+  await fetch('/admin/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({active:on})});
+  document.getElementById('ks-label').textContent=on?'🔵 BRA ON':'⚫ BRA OFF';
+}
+loadKillSwitch();
 </script>
 </body>
 </html>`;
@@ -751,6 +775,10 @@ async function handleRequest(request, env) {
       const sessionId = request.headers.get('X-Session-Id') || body.session_id || uid();
       const customerId = body.customer_id || sessionId;
       if (!message.trim()) return jsonRes({ error: 'Mensaje vacío' }, 400);
+      const braActive = await env.SESSIONS.get('BRA_ACTIVE');
+      if (braActive === 'false') {
+        return jsonRes({ reply: '⏳ Baxto te atenderá personalmente en breve. 🖤' });
+      }
       const result = await chatWithMemory(env, sessionId, customerId, message);
       return jsonRes(result);
     } catch(e) {
@@ -758,7 +786,25 @@ async function handleRequest(request, env) {
     }
   }
 
-  // GET /dashboard
+  // GET /admin/kill-switch-status
+  if (path === '/admin/kill-switch-status' && request.method === 'GET') {
+    const val = await env.SESSIONS.get('BRA_ACTIVE');
+    return jsonRes({ active: val !== 'false' });
+  }
+
+// POST /admin/kill-switch
+  if (path === '/admin/kill-switch' && request.method === 'POST') {
+    try {
+      const body = await request.json();
+      const active = body.active === true ? 'true' : 'false';
+      await env.SESSIONS.put('BRA_ACTIVE', active, { expirationTtl: 86400 * 30 });
+      return jsonRes({ ok: true, BRA_ACTIVE: active });
+    } catch(e) {
+      return jsonRes({ error: e.message }, 500);
+    }
+  }
+
+// GET /dashboard
   if (path === '/dashboard' && request.method === 'GET') {
     return new Response(getDashboardHTML(), {
       headers: { ...CORS, 'Content-Type': 'text/html;charset=UTF-8' }

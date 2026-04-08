@@ -589,18 +589,18 @@ function getDashboardHTML() {
 <title>BRA GT Dashboard v3.1.0</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#00020a;color:#e0f0ff;font-family:'Courier New',monospace;padding:20px;}
+body{background:#00020a;color:#d0eaff;font-family:'Courier New',monospace;padding:20px;font-size:1.05em;}
 h1{font-size:1.6em;color:#9d00ff;text-shadow:0 0 10px #9d00ff;margin-bottom:4px;}
 .sub{color:#3a5a7a;font-size:.85em;margin-bottom:24px;}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;}
 .card{background:rgba(0,5,20,.8);border:1px solid rgba(0,245,255,.15);border-radius:8px;padding:16px;}
 .card .val{font-size:2em;font-weight:bold;color:#ffd700;text-shadow:0 0 8px #ffd700;}
-.card .lbl{font-size:.75em;color:#3a5a7a;margin-top:6px;text-transform:uppercase;letter-spacing:.1em;}
+.card .lbl{font-size:.8em;color:#7ab8d4;margin-top:6px;text-transform:uppercase;letter-spacing:.1em;}
 .section{background:rgba(0,5,20,.8);border:1px solid rgba(0,245,255,.15);border-radius:8px;padding:16px;margin-bottom:16px;}
 .section h2{font-size:1em;color:#00f5ff;margin-bottom:12px;letter-spacing:.1em;}
-table{width:100%;border-collapse:collapse;font-size:.8em;}
-th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(0,245,255,.08);}
-th{color:#3a5a7a;text-transform:uppercase;font-size:.7em;letter-spacing:.1em;}
+table{width:100%;border-collapse:collapse;font-size:.95em;}
+th,td{padding:10px;text-align:left;border-bottom:1px solid rgba(0,245,255,.15);color:#c8e0ff;}
+th{color:#00f5ff;text-transform:uppercase;font-size:.8em;letter-spacing:.1em;}
 .tier-bronze{color:#cd7f32;}.tier-silver{color:#c0c0c0;}.tier-gold{color:#ffd700;}.tier-platinum{color:#e5e4e2;}
 textarea{width:100%;height:160px;background:rgba(0,0,0,.5);color:#e0f0ff;border:1px solid rgba(0,245,255,.2);border-radius:6px;padding:10px;font-family:'Courier New',monospace;font-size:.8em;resize:vertical;margin:8px 0;}
 button{background:#9d00ff;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Courier New',monospace;font-size:.85em;transition:all .2s;}
@@ -637,6 +637,13 @@ button:hover{background:#7c00cc;box-shadow:0 0 12px rgba(157,0,255,.4);}
     <input id="chat-input" type="text" placeholder="Escribe un mensaje..." style="flex:1;background:#111;border:1px solid #444;color:#fff;padding:.6rem .8rem;border-radius:8px;font-size:.95rem" onkeydown="if(event.key==='Enter')sendChat()">
     <button onclick="sendChat()" style="background:#00ff88;color:#000;border:none;padding:.6rem 1.2rem;border-radius:8px;font-weight:bold;cursor:pointer">➤</button>
   </div>
+</div>
+<div class="section" style="margin-top:1rem">
+  <h2>📋 Reglas RLHF Activas</h2>
+  <table>
+    <thead><tr><th>Trigger</th><th>Respuesta</th><th>Acción</th></tr></thead>
+    <tbody id="rulesList"><tr><td colspan="3" style="color:#7ab8d4">Cargando...</td></tr></tbody>
+  </table>
 </div>
 <div class="section" style="margin-top:1rem">
   <h2>🚀 Deploy</h2>
@@ -687,6 +694,7 @@ async function updatePrompt(){
   }catch(e){document.getElementById('status').textContent='❌ Error: '+e.message;}
 }
 loadMetrics();
+loadRules();
 setInterval(loadMetrics,30000);
 
 async function loadKillSwitch(){
@@ -733,6 +741,32 @@ async function sendChat(){
   }
   box.scrollTop=box.scrollHeight;
 }
+async function loadRules() {
+    try {
+      const r = await fetch('/admin/list-rules');
+      const data = await r.json();
+      const tbody = document.getElementById('rulesList');
+      if (!data.rules.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:#7ab8d4">Sin reglas guardadas</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.rules.map(rule => '<tr><td style="color:#00f5ff;font-weight:bold">' + rule.trigger + '</td><td style="color:#d0eaff">' + rule.response.substring(0,60) + '...</td><td><button onclick="deleteRule(\'' + rule.id + '\')" style="background:#ff003c;padding:4px 10px;font-size:.75em">🗑️</button></td></tr>').join('');
+    } catch(e) { console.error(e); }
+  }
+
+  async function deleteRule(id) {
+    if (!confirm('¿Eliminar esta regla?')) return;
+    try {
+      const r = await fetch('/admin/delete-rule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await r.json();
+      if (data.ok) loadRules();
+    } catch(e) {}
+  }
+
 async function saveRule() {
     const trigger = document.getElementById('rule-trigger').value.trim();
     const response = document.getElementById('rule-response').value.trim();
@@ -746,7 +780,7 @@ async function saveRule() {
       });
       const data = await r.json();
       if (data.ok) {
-        status.textContent = '✅ Regla guardada';
+        status.textContent = '✅ Regla guardada'; loadRules();
         document.getElementById('rule-trigger').value = '';
         document.getElementById('rule-response').value = '';
       } else {
@@ -1026,6 +1060,26 @@ async function handleRequest(request, env) {
 
   // POST /admin/update-prompt
 
+
+  if (path === '/admin/list-rules' && request.method === 'GET') {
+    try {
+      const rules = await env.DB.prepare('SELECT * FROM baxto_rules WHERE active = 1 ORDER BY created_at DESC').all();
+      return jsonRes({ ok: true, rules: rules.results });
+    } catch(e) {
+      return jsonRes({ ok: false, error: e.message }, 500);
+    }
+  }
+
+  if (path === '/admin/delete-rule' && request.method === 'POST') {
+    try {
+      const { id } = await request.json();
+      await env.DB.prepare('UPDATE baxto_rules SET active = 0 WHERE id = ?').bind(id).run();
+      return jsonRes({ ok: true, message: 'Regla eliminada' });
+    } catch(e) {
+      return jsonRes({ ok: false, error: e.message }, 500);
+    }
+  }
+
   if (path === '/admin/init-db' && request.method === 'POST') {
     const result = await initDB(env);
     return jsonRes(result);
@@ -1036,6 +1090,11 @@ async function handleRequest(request, env) {
       const { trigger, response } = await request.json();
       if (!trigger || !response) return jsonRes({ ok: false, error: 'trigger y response requeridos' }, 400);
       const now = Math.floor(Date.now()/1000);
+      const existing = await env.DB.prepare('SELECT id FROM baxto_rules WHERE trigger = ? AND active = 1').bind(trigger.toLowerCase().trim()).first();
+      if (existing) {
+        await env.DB.prepare('UPDATE baxto_rules SET response = ?, created_at = ? WHERE id = ?').bind(response.trim(), now, existing.id).run();
+        return jsonRes({ ok: true, message: 'Regla actualizada' });
+      }
       await env.DB.prepare(
         'INSERT INTO baxto_rules (id, trigger, response, created_at, active) VALUES (?, ?, ?, ?, 1)'
       ).bind(uid(), trigger.toLowerCase().trim(), response.trim(), now).run();

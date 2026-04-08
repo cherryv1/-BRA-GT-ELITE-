@@ -397,6 +397,20 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   if (profile?.name) {
     systemPrompt += `\n\nEl cliente se llama ${profile.name}. Úsalo naturalmente.`;
   }
+  // CONTEXTO DE ORO — inyectar datos del Intent Router en systemPrompt
+  try {
+    const rawKV = await env.SESSIONS.get(`sess:${sessionId}`);
+    if (rawKV) {
+      const kvData = JSON.parse(rawKV);
+      const ctx = kvData.context || {};
+      if (ctx.diseño || ctx.zona || ctx.tamano) {
+        systemPrompt += `\n\nCONTEXTO CONFIRMADO DEL CLIENTE: ${ctx.diseño ? 'Diseño: '+ctx.diseño : ''} ${ctx.zona ? '| Zona: '+ctx.zona : ''} ${ctx.tamano ? '| Tamaño: '+ctx.tamano : ''}. NO preguntes esto de nuevo.`;
+      }
+      if (kvData.nombre) {
+        systemPrompt += `\n\nEl cliente se llama ${kvData.nombre}.`;
+      }
+    }
+  } catch(e) {}
 
   const session = await getSession(env, sessionId);
   session.messages.push({ role: 'user', content: message });

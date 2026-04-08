@@ -986,7 +986,23 @@ async function handleRequest(request, env) {
     return jsonRes({ status: 'ok', service: 'BRA GT Elite', version: '3.1.0', timestamp: new Date().toISOString() });
   }
 
-  return new Response('Not Found', { status: 404, headers: CORS });
+  
+  // POST /admin/chat — Baxto habla con BRA GT (CMV)
+  if (path === '/admin/chat' && request.method === 'POST') {
+    try {
+      const body = await request.json();
+      const message = body.message || '';
+      const sessionId = body.session_id || 'admin_' + Date.now();
+      
+      // Usar chatWithMemory con customerId especial para Baxto
+      const result = await chatWithMemory(env, sessionId, 'admin_baxto', message);
+      return jsonRes(result);
+    } catch(e) {
+      return jsonRes({ error: e.message }, 500);
+    }
+  }
+
+return new Response('Not Found', { status: 404, headers: CORS });
 }
 
 

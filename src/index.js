@@ -967,6 +967,26 @@ async function handleRequest(request, env) {
   }
 
   // POST /admin/update-prompt
+
+  if (path === '/admin/init-db' && request.method === 'POST') {
+    const result = await initDB(env);
+    return jsonRes(result);
+  }
+
+  if (path === '/admin/save-rule' && request.method === 'POST') {
+    try {
+      const { trigger, response } = await request.json();
+      if (!trigger || !response) return jsonRes({ ok: false, error: 'trigger y response requeridos' }, 400);
+      const now = Math.floor(Date.now()/1000);
+      await env.DB.prepare(
+        'INSERT INTO baxto_rules (id, trigger, response, created_at, active) VALUES (?, ?, ?, ?, 1)'
+      ).bind(uid(), trigger.toLowerCase().trim(), response.trim(), now).run();
+      return jsonRes({ ok: true, message: 'Regla guardada' });
+    } catch(e) {
+      return jsonRes({ ok: false, error: e.message }, 500);
+    }
+  }
+
   if (path === '/admin/update-prompt' && request.method === 'POST') {
     try {
       const body = await request.json();
@@ -1105,6 +1125,27 @@ function intentRouter(message) {
   return null; // No hay match — pasa al LLM
 }
 // ============================================================================
+
+// ============================================================================
+// INIT DB — crea tabla baxto_rules
+// ============================================================================
+async function initDB(env) {
+  try {
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS baxto_rules (
+        id TEXT PRIMARY KEY,
+        trigger TEXT NOT NULL,
+        response TEXT NOT NULL,
+        created_at INTEGER,
+        active INTEGER DEFAULT 1
+      )
+    `).run();
+    return { ok: true, message: 'Tabla baxto_rules creada o ya existia' };
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
+}
+
 export default {
   fetch: handleRequest,
   async scheduled(event, env, ctx) {

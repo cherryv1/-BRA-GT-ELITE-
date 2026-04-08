@@ -641,6 +641,13 @@ button:hover{background:#7c00cc;box-shadow:0 0 12px rgba(157,0,255,.4);}
 <div class="section" style="margin-top:1rem">
   <h2>🚀 Deploy</h2>
   <button id="deploy-btn" onclick="triggerDeploy()" style="background:#ff6b00;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:8px;font-size:1rem;cursor:pointer">🚀 Deploy</button>
+  <div style="margin-top:16px;background:rgba(0,5,20,.8);border:1px solid rgba(0,245,255,.15);border-radius:8px;padding:16px;">
+    <div style="color:#00f5ff;font-size:.9em;margin-bottom:8px;letter-spacing:.1em;">💾 GUARDAR REGLA RLHF</div>
+    <input id="rule-trigger" placeholder="Trigger (ej: cuanto cuesta)" style="width:100%;background:#00020a;border:1px solid rgba(0,245,255,.3);color:#e0f0ff;padding:.5rem;border-radius:6px;margin-bottom:8px;font-family:monospace;font-size:.85em;">
+    <textarea id="rule-response" placeholder="Respuesta de Baxto..." rows="3" style="width:100%;background:#00020a;border:1px solid rgba(0,245,255,.3);color:#e0f0ff;padding:.5rem;border-radius:6px;margin-bottom:8px;font-family:monospace;font-size:.85em;resize:vertical;"></textarea>
+    <button onclick="saveRule()" style="background:#9d00ff;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:8px;font-size:.9rem;cursor:pointer">💾 Guardar Regla</button>
+    <span id="rule-status" style="color:#00ff88;font-size:.8em;margin-left:10px;"></span>
+  </div>
   <span id="deploy-status" style="margin-left:1rem;font-size:.95rem"></span>
 </div>
 <div class="section" style="margin-top:1rem">
@@ -726,6 +733,28 @@ async function sendChat(){
   }
   box.scrollTop=box.scrollHeight;
 }
+async function saveRule() {
+    const trigger = document.getElementById('rule-trigger').value.trim();
+    const response = document.getElementById('rule-response').value.trim();
+    const status = document.getElementById('rule-status');
+    if (!trigger || !response) { status.textContent = '⚠️ Completa ambos campos'; return; }
+    try {
+      const r = await fetch('/admin/save-rule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trigger, response })
+      });
+      const data = await r.json();
+      if (data.ok) {
+        status.textContent = '✅ Regla guardada';
+        document.getElementById('rule-trigger').value = '';
+        document.getElementById('rule-response').value = '';
+      } else {
+        status.textContent = '❌ Error: ' + data.error;
+      }
+    } catch(e) { status.textContent = '❌ Error de red'; }
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  }
 async function triggerDeploy(){
   const btn=document.getElementById('deploy-btn');
   const st=document.getElementById('deploy-status');

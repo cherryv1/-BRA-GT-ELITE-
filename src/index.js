@@ -313,12 +313,41 @@ async function getLilyConfig(env) {
   } catch(e) { return null; }
 }
 
+
+// ============================================================================
+// RLHF — consultar reglas de Baxto antes del LLM
+// ============================================================================
+async function checkBaxtoRules(env, message) {
+  try {
+    const rules = await env.DB.prepare(
+      'SELECT * FROM baxto_rules WHERE active = 1'
+    ).all();
+    if (!rules.results.length) return null;
+    const msg = message.toLowerCase().trim();
+    for (const rule of rules.results) {
+      if (msg.includes(rule.trigger)) return rule.response;
+    }
+    return null;
+  } catch(e) { return null; }
+}
+
 // ============================================================================
 // CHAT WITH MEMORY
 // ============================================================================
 
 async function chatWithMemory(env, sessionId, customerId, message) {
   const config = await getLilyConfig(env);
+
+  // RLHF — reglas de Baxto primero
+  const ruleMatch = await checkBaxtoRules(env, message);
+  if (ruleMatch) {
+    const session = await getSession(env, sessionId);
+    session.messages.push({ role: 'user', content: message });
+    session.messages.push({ role: 'assistant', content: ruleMatch });
+    await saveSession(env, sessionId, session);
+    return { reply: ruleMatch, model: 'BaxtoRules', tier: 'bronze', session_id: sessionId };
+  }
+
     // INTENT ROUTER — respuesta instantánea sin LLM
     const intentResult = intentRouter(message);
     if (intentResult) {

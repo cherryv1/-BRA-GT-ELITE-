@@ -695,6 +695,8 @@ async function updatePrompt(){
 }
 loadMetrics();
 loadRules();
+loadCustomers();
+loadKillSwitch();
 setInterval(loadMetrics,30000);
 
 async function loadKillSwitch(){
@@ -741,6 +743,20 @@ async function sendChat(){
   }
   box.scrollTop=box.scrollHeight;
 }
+
+async function loadCustomers() {
+  try {
+    const r = await fetch('/api/customers');
+    const data = await r.json();
+    const tbody = document.getElementById('customerList');
+    if (!data.customers || !data.customers.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:#7ab8d4">Sin clientes</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.customers.map(c => '<tr><td style="color:#7ab8d4">' + c.customer_id.slice(-6) + '</td><td style="color:#d0eaff">' + (c.name||'—') + '</td><td class="tier-' + (c.tier||'bronze') + '">' + (c.tier||'bronze') + '</td><td style="color:#d0eaff">' + (c.visit_count||1) + '</td><td style="color:#7ab8d4">' + new Date((c.last_visit||0)*1000).toLocaleDateString() + '</td></tr>').join('');
+  } catch(e) { console.error('loadCustomers:', e); }
+}
+
 async function loadRules() {
     try {
       const r = await fetch('/admin/list-rules');

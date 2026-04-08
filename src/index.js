@@ -413,6 +413,9 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   } catch(e) {}
 
   const session = await getSession(env, sessionId);
+  if (session.modoLily) {
+    systemPrompt += `\n\nMODO LILY ACTIVO: Estás hablando con Baxto, tu creador. Trátalo como colaborador directo, no como cliente. Interpreta sus mensajes en contexto técnico/creativo. Si pregunta "te cortaste?" significa que hubo una falla de contexto — responde reconectando. Mantén personalidad BRA GT pero sin protocolo de ventas.`;
+  }
   if (!session.messages) session.messages = [];
     session.messages.push({ role: 'user', content: message });
   const recentMessages = session.messages.slice(-4);
@@ -422,6 +425,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   if (ultraInstinto) {
     const reply = 'Ultra Instinto activado, te reconozco creador. Que construimos?';
     if (!session.messages) session.messages = [];
+    session.modoLily = true;
     session.messages.push({ role: 'assistant', content: reply });
     await saveSession(env, sessionId, session);
     return { reply, model: 'UltraInstinto', tier, session_id: sessionId };
@@ -431,6 +435,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
   if (kaioKen) {
     const reply = 'Kaio-ken desactivado, volviendo al modo asistente normal.';
     if (!session.messages) session.messages = [];
+    session.modoLily = false;
     session.messages.push({ role: 'assistant', content: reply });
     await saveSession(env, sessionId, session);
     return { reply, model: 'KaioKen', tier, session_id: sessionId };

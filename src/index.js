@@ -869,9 +869,7 @@ async function handleRequest(request, env) {
 
 // GET /dashboard
   if (path === '/dashboard' && request.method === 'GET') {
-    return new Response(getDashboardHTML(), {
-      headers: { ...CORS, 'Content-Type': 'text/html;charset=UTF-8' }
-    });
+    return getDashboardHTML();
   }
 
   // GET /api/metrics

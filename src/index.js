@@ -591,6 +591,11 @@ button:hover{background:#7c00cc;box-shadow:0 0 12px rgba(157,0,255,.4);}
   <div id="status"></div>
 </div>
 <div class="section" style="margin-top:1rem">
+  <h2>🚀 Deploy</h2>
+  <button id="deploy-btn" onclick="triggerDeploy()" style="background:#ff6b00;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:8px;font-size:1rem;cursor:pointer">🚀 Deploy</button>
+  <span id="deploy-status" style="margin-left:1rem;font-size:.95rem"></span>
+</div>
+<div class="section" style="margin-top:1rem">
   <h2>🔌 Kill Switch BRA GT</h2>
   <label style="display:flex;align-items:center;gap:1rem;cursor:pointer">
     <input type="checkbox" id="ks-toggle" onchange="toggleKillSwitch()" style="width:2rem;height:2rem;cursor:pointer">
@@ -642,6 +647,33 @@ async function toggleKillSwitch(){
   const on=document.getElementById('ks-toggle').checked;
   await fetch('/admin/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({active:on})});
   document.getElementById('ks-label').textContent=on?'🔵 BRA ON':'⚫ BRA OFF';
+}
+async function triggerDeploy(){
+  const btn=document.getElementById('deploy-btn');
+  const st=document.getElementById('deploy-status');
+  btn.disabled=true;
+  btn.textContent='⏳ Deploying...';
+  st.style.color='#ffaa00';
+  st.textContent='Enviando a GitHub Actions...';
+  try{
+    const r=await fetch('/admin/deploy',{method:'POST'});
+    const d=await r.json();
+    if(d.ok){
+      btn.textContent='✅ Done';
+      st.style.color='#00ff88';
+      st.textContent='Deploy iniciado — listo en ~30s';
+      setTimeout(()=>{btn.disabled=false;btn.textContent='🚀 Deploy';st.textContent='';},15000);
+    } else {
+      btn.textContent='❌ Error';
+      st.style.color='#ff4444';
+      st.textContent=d.error||'Error desconocido';
+      setTimeout(()=>{btn.disabled=false;btn.textContent='🚀 Deploy';},5000);
+    }
+  }catch(e){
+    btn.textContent='❌ Error';
+    st.textContent=e.message;
+    setTimeout(()=>{btn.disabled=false;btn.textContent='🚀 Deploy';},5000);
+  }
 }
 loadKillSwitch();
 </script>
@@ -786,7 +818,27 @@ async function handleRequest(request, env) {
     }
   }
 
-  // GET /admin/kill-switch-status
+  // POST /admin/deploy
+  if (path === '/admin/deploy' && request.method === 'POST') {
+    try {
+      const r = await fetch('https://api.github.com/repos/cherryv1/-BLACK-LILY-/actions/workflows/deploy.yml/dispatches', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.TOKE_420}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ref: 'main' })
+      });
+      if (r.status === 204) return jsonRes({ ok: true });
+      const err = await r.text();
+      return jsonRes({ ok: false, error: err }, 500);
+    } catch(e) {
+      return jsonRes({ error: e.message }, 500);
+    }
+  }
+
+// GET /admin/kill-switch-status
   if (path === '/admin/kill-switch-status' && request.method === 'GET') {
     const val = await env.SESSIONS.get('BRA_ACTIVE');
     return jsonRes({ active: val !== 'false' });

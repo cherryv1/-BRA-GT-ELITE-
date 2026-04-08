@@ -581,262 +581,115 @@ async function chatWithMemory(env, sessionId, customerId, message) {
 // ============================================================================
 
 function getDashboardHTML() {
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BRA GT Dashboard v3.1.0</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#00020a;color:#d0eaff;font-family:'Courier New',monospace;padding:20px;font-size:1.05em;}
-h1{font-size:1.6em;color:#9d00ff;text-shadow:0 0 10px #9d00ff;margin-bottom:4px;}
-.sub{color:#3a5a7a;font-size:.85em;margin-bottom:24px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;}
-.card{background:rgba(0,5,20,.8);border:1px solid rgba(0,245,255,.15);border-radius:8px;padding:16px;}
-.card .val{font-size:2em;font-weight:bold;color:#ffd700;text-shadow:0 0 8px #ffd700;}
-.card .lbl{font-size:.8em;color:#7ab8d4;margin-top:6px;text-transform:uppercase;letter-spacing:.1em;}
-.section{background:rgba(0,5,20,.8);border:1px solid rgba(0,245,255,.15);border-radius:8px;padding:16px;margin-bottom:16px;}
-.section h2{font-size:1em;color:#00f5ff;margin-bottom:12px;letter-spacing:.1em;}
-table{width:100%;border-collapse:collapse;font-size:.95em;}
-th,td{padding:10px;text-align:left;border-bottom:1px solid rgba(0,245,255,.15);color:#c8e0ff;}
-th{color:#00f5ff;text-transform:uppercase;font-size:.8em;letter-spacing:.1em;}
-.tier-bronze{color:#cd7f32;}.tier-silver{color:#c0c0c0;}.tier-gold{color:#ffd700;}.tier-platinum{color:#e5e4e2;}
-textarea{width:100%;height:160px;background:rgba(0,0,0,.5);color:#e0f0ff;border:1px solid rgba(0,245,255,.2);border-radius:6px;padding:10px;font-family:'Courier New',monospace;font-size:.8em;resize:vertical;margin:8px 0;}
-button{background:#9d00ff;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Courier New',monospace;font-size:.85em;transition:all .2s;}
-button:hover{background:#7c00cc;box-shadow:0 0 12px rgba(157,0,255,.4);}
-#status{margin-top:8px;font-size:.8em;}
-</style>
-</head>
-<body>
-<h1>🖤⚜️ BRA GT Elite v3.1.0</h1>
-<div class="sub">Baxto Style Tattoo — Admin Dashboard</div>
-<div class="grid">
-  <div class="card"><div class="val" id="totalClientes">—</div><div class="lbl">Clientes</div></div>
-  <div class="card"><div class="val" id="totalConversiones">—</div><div class="lbl">Conversiones</div></div>
-  <div class="card"><div class="val" id="engagementPromedio">—</div><div class="lbl">Engagement Avg</div></div>
-  <div class="card"><div class="val" id="tasaConversion">—</div><div class="lbl">Tasa Conversión</div></div>
-</div>
-<div class="section">
-  <h2>👥 Últimos Clientes</h2>
-  <table>
-    <thead><tr><th>ID</th><th>Nombre</th><th>Tier</th><th>Visitas</th><th>Última visita</th></tr></thead>
-    <tbody id="customerList"><tr><td colspan="5">Cargando...</td></tr></tbody>
-  </table>
-</div>
-<div class="section">
-  <h2>⚙️ Editor de System Prompt</h2>
-  <textarea id="promptEditor" placeholder="Ingresa el nuevo system prompt de BRA GT..."></textarea>
-  <button onclick="updatePrompt()">Actualizar Prompt</button>
-  <div id="status"></div>
-</div>
-<div class="section" style="margin-top:1rem">
-  <h2>💬 Chat con BRA GT</h2>
-  <div id="chat-box" style="background:#0a0a0a;border:1px solid #333;border-radius:8px;height:220px;overflow-y:auto;padding:.8rem;margin-bottom:.8rem;font-size:.9rem;display:flex;flex-direction:column;gap:.5rem"></div>
-  <div style="display:flex;gap:.5rem">
-    <input id="chat-input" type="text" placeholder="Escribe un mensaje..." style="flex:1;background:#111;border:1px solid #444;color:#fff;padding:.6rem .8rem;border-radius:8px;font-size:.95rem" onkeydown="if(event.key==='Enter')sendChat()">
-    <button onclick="sendChat()" style="background:#00ff88;color:#000;border:none;padding:.6rem 1.2rem;border-radius:8px;font-weight:bold;cursor:pointer">➤</button>
-  </div>
-</div>
-<div class="section" style="margin-top:1rem">
-  <h2>📋 Reglas RLHF Activas</h2>
-  <table>
-    <thead><tr><th>Trigger</th><th>Respuesta</th><th>Acción</th></tr></thead>
-    <tbody id="rulesList"><tr><td colspan="3" style="color:#7ab8d4">Cargando...</td></tr></tbody>
-  </table>
-</div>
-<div class="section" style="margin-top:1rem">
-  <h2>🚀 Deploy</h2>
-  <button id="deploy-btn" onclick="triggerDeploy()" style="background:#ff6b00;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:8px;font-size:1rem;cursor:pointer">🚀 Deploy</button>
-  <div style="margin-top:16px;background:rgba(0,5,20,.8);border:1px solid rgba(0,245,255,.15);border-radius:8px;padding:16px;">
-    <div style="color:#00f5ff;font-size:.9em;margin-bottom:8px;letter-spacing:.1em;">💾 GUARDAR REGLA RLHF</div>
-    <input id="rule-trigger" placeholder="Trigger (ej: cuanto cuesta)" style="width:100%;background:#00020a;border:1px solid rgba(0,245,255,.3);color:#e0f0ff;padding:.5rem;border-radius:6px;margin-bottom:8px;font-family:monospace;font-size:.85em;">
-    <textarea id="rule-response" placeholder="Respuesta de Baxto..." rows="3" style="width:100%;background:#00020a;border:1px solid rgba(0,245,255,.3);color:#e0f0ff;padding:.5rem;border-radius:6px;margin-bottom:8px;font-family:monospace;font-size:.85em;resize:vertical;"></textarea>
-    <button onclick="saveRule()" style="background:#9d00ff;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:8px;font-size:.9rem;cursor:pointer">💾 Guardar Regla</button>
-    <span id="rule-status" style="color:#00ff88;font-size:.8em;margin-left:10px;"></span>
-  </div>
-  <span id="deploy-status" style="margin-left:1rem;font-size:.95rem"></span>
-</div>
-<div class="section" style="margin-top:1rem">
-  <h2>🔌 Kill Switch BRA GT</h2>
-  <label style="display:flex;align-items:center;gap:1rem;cursor:pointer">
-    <input type="checkbox" id="ks-toggle" onchange="toggleKillSwitch()" style="width:2rem;height:2rem;cursor:pointer">
-    <span id="ks-label" style="font-size:1.2rem">Cargando...</span>
-  </label>
-  <p style="opacity:.6;font-size:.85rem">OFF = clientes ven mensaje de espera, BRA no responde</p>
-</div>
-<script>
-async function loadMetrics(){
-  try{
-    const r=await fetch('/api/metrics');
-    const d=await r.json();
-    document.getElementById('totalClientes').textContent=d.totalClientes||0;
-    document.getElementById('totalConversiones').textContent=d.totalConversiones||0;
-    document.getElementById('engagementPromedio').textContent=(d.engagementPromedio||0).toFixed(1);
-    document.getElementById('tasaConversion').textContent=(d.tasaConversion||0).toFixed(1)+'%';
-    const html=(d.customers||[]).map(c=>\`<tr>
-      <td>\${c.customer_id?.slice(0,8)||'—'}</td>
-      <td>\${c.name||'—'}</td>
-      <td class="tier-\${c.tier||'bronze'}">\${c.tier||'bronze'}</td>
-      <td>\${c.visit_count||0}</td>
-      <td>\${c.last_visit?new Date(c.last_visit*1000).toLocaleDateString('es-MX'):'—'}</td>
-    </tr>\`).join('');
-    document.getElementById('customerList').innerHTML=html||'<tr><td colspan="5">Sin clientes aún</td></tr>';
-  }catch(e){console.error(e);}
-}
-async function updatePrompt(){
-  const p=document.getElementById('promptEditor').value.trim();
-  if(!p){alert('Ingresa un prompt');return;}
-  try{
-    const r=await fetch('/admin/update-prompt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_prompt_override:p})});
-    const d=await r.json();
-    document.getElementById('status').textContent=d.success?'✅ Prompt actualizado':'❌ Error al actualizar';
-  }catch(e){document.getElementById('status').textContent='❌ Error: '+e.message;}
-}
-loadMetrics();
-loadRules();
-loadCustomers();
-loadKillSwitch();
-setInterval(loadMetrics,30000);
-
-async function loadKillSwitch(){
-  try{
-    const r=await fetch('/admin/kill-switch-status');
-    const d=await r.json();
-    const on=d.active!==false;
-    document.getElementById('ks-toggle').checked=on;
-    document.getElementById('ks-label').textContent=on?'🔵 BRA ON':'⚫ BRA OFF';
-  }catch(e){}
-}
-async function toggleKillSwitch(){
-  const on=document.getElementById('ks-toggle').checked;
-  await fetch('/admin/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({active:on})});
-  document.getElementById('ks-label').textContent=on?'🔵 BRA ON':'⚫ BRA OFF';
-}
-async function sendChat(){
-  const input=document.getElementById('chat-input');
-  const box=document.getElementById('chat-box');
-  const msg=input.value.trim();
-  if(!msg)return;
-  input.value='';
-  const userDiv=document.createElement('div');
-  userDiv.style.cssText='align-self:flex-end;background:#1a1a2e;color:#00ff88;padding:.4rem .8rem;border-radius:12px 12px 2px 12px;max-width:80%';
-  userDiv.textContent='Baxto: '+msg;
-  box.appendChild(userDiv);
-  box.scrollTop=box.scrollHeight;
-  const thinkDiv=document.createElement('div');
-  thinkDiv.style.cssText='align-self:flex-start;color:#666;font-style:italic;font-size:.85rem';
-  thinkDiv.textContent='BRA GT escribiendo...';
-  box.appendChild(thinkDiv);
-  box.scrollTop=box.scrollHeight;
-  try{
-    const r=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Session-Id':'dashboard-baxto'},
-      body:JSON.stringify({message:msg})
-    });
-    const d=await r.json();
-    thinkDiv.style.cssText='align-self:flex-start;background:#111;color:#e0e0e0;padding:.4rem .8rem;border-radius:12px 12px 12px 2px;max-width:80%';
-    thinkDiv.textContent='BRA: '+(d.reply||d.error||'Sin respuesta');
-  }catch(e){
-    thinkDiv.textContent='❌ Error: '+e.message;
-  }
-  box.scrollTop=box.scrollHeight;
+  const html = [
+    '<!DOCTYPE html>',
+    '<html lang="es">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    '<title>BRA GT Dashboard</title>',
+    '<style>',
+    '@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700&display=swap");',
+    '*{margin:0;padding:0;box-sizing:border-box;}',
+    'body{background:#000;color:#e0ffe0;font-family:"Rajdhani",sans-serif;min-height:100vh;overflow-x:hidden;}',
+    'canvas{position:fixed;top:0;left:0;z-index:0;pointer-events:none;}',
+    '.wrap{position:relative;z-index:1;padding:16px;}',
+    'h1{font-family:"Orbitron",monospace;font-size:1.4em;color:#00ff41;text-shadow:0 0 20px #00ff41;letter-spacing:.15em;margin-bottom:2px;}',
+    '.sub{color:#00aa33;font-size:.8em;letter-spacing:.2em;margin-bottom:20px;}',
+    '.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}',
+    '.card{background:rgba(0,20,0,.85);border:1px solid #00ff41;border-radius:8px;padding:14px;text-align:center;box-shadow:0 0 10px rgba(0,255,65,.15);}',
+    '.card .val{font-family:"Orbitron",monospace;font-size:1.8em;color:#00ff41;text-shadow:0 0 10px #00ff41;}',
+    '.card .lbl{font-size:.75em;color:#00aa33;margin-top:4px;letter-spacing:.1em;text-transform:uppercase;}',
+    '.section{background:rgba(0,15,0,.9);border:1px solid rgba(0,255,65,.25);border-radius:10px;padding:14px;margin-bottom:12px;}',
+    '.section h2{font-family:"Orbitron",monospace;font-size:.85em;color:#00ff88;margin-bottom:12px;letter-spacing:.1em;text-shadow:0 0 8px #00ff88;}',
+    'table{width:100%;border-collapse:collapse;font-size:.9em;}',
+    'th{color:#00ff41;font-size:.75em;letter-spacing:.1em;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid rgba(0,255,65,.3);}',
+    'td{padding:8px 6px;color:#ccffcc;border-bottom:1px solid rgba(0,255,65,.08);font-size:.9em;}',
+    'input,textarea{width:100%;background:rgba(0,30,0,.8);border:1px solid rgba(0,255,65,.4);color:#ccffcc;padding:.6rem;border-radius:6px;font-family:"Rajdhani",sans-serif;font-size:1em;margin-bottom:8px;}',
+    'input::placeholder,textarea::placeholder{color:#336633;}',
+    'button{background:transparent;color:#00ff41;border:1px solid #00ff41;padding:.6rem 1.2rem;border-radius:6px;cursor:pointer;font-family:"Orbitron",monospace;font-size:.75em;letter-spacing:.1em;transition:all .2s;}',
+    'button:hover{background:#00ff41;color:#000;box-shadow:0 0 20px #00ff41;}',
+    '.btn-red{border-color:#ff003c;color:#ff003c;}.btn-red:hover{background:#ff003c;color:#fff;box-shadow:0 0 20px #ff003c;}',
+    '.btn-orange{border-color:#ff6b00;color:#ff6b00;}.btn-orange:hover{background:#ff6b00;color:#fff;box-shadow:0 0 20px #ff6b00;}',
+    '.btn-cyan{border-color:#00f5ff;color:#00f5ff;}.btn-cyan:hover{background:#00f5ff;color:#000;box-shadow:0 0 20px #00f5ff;}',
+    '#chat-box{background:rgba(0,10,0,.9);border:1px solid rgba(0,255,65,.2);border-radius:8px;height:200px;overflow-y:auto;padding:.8rem;margin-bottom:.8rem;display:flex;flex-direction:column;gap:.5rem;}',
+    '.msg-user{align-self:flex-end;background:rgba(0,255,65,.15);border:1px solid rgba(0,255,65,.3);padding:.4rem .8rem;border-radius:12px 12px 2px 12px;font-size:.9em;max-width:80%;}',
+    '.msg-bot{align-self:flex-start;background:rgba(0,100,0,.2);border:1px solid rgba(0,255,65,.15);padding:.4rem .8rem;border-radius:12px 12px 12px 2px;font-size:.9em;max-width:85%;}',
+    '.ks-row{display:flex;align-items:center;gap:12px;margin-top:8px;}',
+    '.switch{position:relative;width:52px;height:26px;}',
+    '.switch input{opacity:0;width:0;height:0;}',
+    '.slider{position:absolute;inset:0;background:#1a1a1a;border:1px solid #00ff41;border-radius:26px;cursor:pointer;transition:.3s;}',
+    '.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#00ff41;border-radius:50%;transition:.3s;}',
+    'input:checked+.slider{background:rgba(0,255,65,.2);}',
+    'input:checked+.slider:before{transform:translateX(26px);}',
+    '#ks-label{font-size:.9em;color:#00ff41;}',
+    '#status,#rule-status,#deploy-status{font-size:.85em;color:#00ff88;margin-top:6px;min-height:18px;}',
+    '.tier-bronze{color:#cd7f32;}.tier-silver{color:#c0c0c0;}.tier-gold{color:#ffd700;}.tier-platinum{color:#00f5ff;}',
+    '</style></head><body>',
+    '<canvas id="c"></canvas>',
+    '<div class="wrap">',
+    '<h1>&#11041; BRA GT ELITE</h1>',
+    '<div class="sub">BAXTO STYLE TATTOO &mdash; METAWORK DASHBOARD</div>',
+    '<div class="grid">',
+    '<div class="card"><div class="val" id="totalClientes">&#8212;</div><div class="lbl">Clientes</div></div>',
+    '<div class="card"><div class="val" id="totalConversiones">&#8212;</div><div class="lbl">Conversiones</div></div>',
+    '<div class="card"><div class="val" id="engagementPromedio">&#8212;</div><div class="lbl">Engagement</div></div>',
+    '<div class="card"><div class="val" id="tasaConversion">&#8212;</div><div class="lbl">Conversion %</div></div>',
+    '</div>',
+    '<div class="section"><h2>&#128101; CLIENTES</h2>',
+    '<table><thead><tr><th>ID</th><th>Nombre</th><th>Tier</th><th>Visitas</th></tr></thead>',
+    '<tbody id="customerList"><tr><td colspan="4" style="color:#336633">Cargando...</td></tr></tbody></table></div>',
+    '<div class="section"><h2>&#128203; REGLAS RLHF</h2>',
+    '<table><thead><tr><th>Trigger</th><th>Respuesta</th><th></th></tr></thead>',
+    '<tbody id="rulesList"><tr><td colspan="3" style="color:#336633">Cargando...</td></tr></tbody></table>',
+    '<div style="margin-top:12px">',
+    '<input id="rule-trigger" placeholder="Trigger (ej: cuanto cuesta)">',
+    '<textarea id="rule-response" placeholder="Respuesta de Baxto..." rows="2"></textarea>',
+    '<button class="btn-cyan" onclick="saveRule()">&#128190; GUARDAR REGLA</button>',
+    '<div id="rule-status"></div></div></div>',
+    '<div class="section"><h2>&#128172; CHAT BRA GT</h2>',
+    '<div id="chat-box"></div>',
+    '<div style="display:flex;gap:8px">',
+    '<input id="chat-input" type="text" placeholder="Mensaje..." onkeydown="if(event.key===\'Enter\')sendChat()" style="margin:0">',
+    '<button class="btn-cyan" onclick="sendChat()" style="white-space:nowrap">&#10148; SEND</button>',
+    '</div></div>',
+    '<div class="section"><h2>&#9881; SYSTEM PROMPT</h2>',
+    '<textarea id="promptEditor" placeholder="System prompt de BRA GT..." rows="4"></textarea>',
+    '<button onclick="updatePrompt()">&#9889; ACTUALIZAR PROMPT</button>',
+    '<div id="status"></div></div>',
+    '<div class="section"><h2>&#128299; KILL SWITCH</h2>',
+    '<div class="ks-row">',
+    '<label class="switch"><input type="checkbox" id="ks-toggle" onchange="toggleKS()"><span class="slider"></span></label>',
+    '<span id="ks-label">Cargando...</span></div></div>',
+    '<div class="section"><h2>&#128640; DEPLOY</h2>',
+    '<button id="deploy-btn" class="btn-orange" onclick="triggerDeploy()">&#128640; TRIGGER DEPLOY</button>',
+    '<div id="deploy-status"></div></div>',
+    '</div>',
+    '<script>',
+    'const canvas=document.getElementById("c"),ctx=canvas.getContext("2d");',
+    'let W,H,nodes=[];',
+    'function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}',
+    'function initNodes(){nodes=[];for(let i=0;i<60;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});}',
+    'function drawNodes(){ctx.clearRect(0,0,W,H);nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;});for(let i=0;i<nodes.length;i++){for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<120){ctx.beginPath();ctx.strokeStyle="rgba(0,255,65,"+(1-dist/120)*.3+")";ctx.lineWidth=.5;ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();}}ctx.beginPath();ctx.arc(nodes[i].x,nodes[i].y,2,0,Math.PI*2);ctx.fillStyle="#00ff41";ctx.fill();}requestAnimationFrame(drawNodes);}',
+    'resize();initNodes();drawNodes();',
+    'window.addEventListener("resize",()=>{resize();initNodes();});',
+    'async function loadMetrics(){try{const r=await fetch("/api/metrics"),d=await r.json();document.getElementById("totalClientes").textContent=d.totalClientes??"?";document.getElementById("totalConversiones").textContent=d.totalConversiones??"?";document.getElementById("engagementPromedio").textContent=d.engagementPromedio?d.engagementPromedio.toFixed(0):"?";document.getElementById("tasaConversion").textContent=d.tasaConversion?d.tasaConversion.toFixed(1)+"%":"?";}catch(e){}}',
+    'async function loadCustomers(){try{const r=await fetch("/api/customers"),data=await r.json(),tbody=document.getElementById("customerList");if(!data.customers||!data.customers.length){tbody.innerHTML="<tr><td colspan=4 style=color:#336633>Sin clientes</td></tr>";return;}tbody.innerHTML=data.customers.map(c=>"<tr><td style=color:#00aa33>"+c.customer_id.slice(-6)+"</td><td>"+( c.name||"—")+"</td><td class=tier-"+(c.tier||"bronze")+">"+(c.tier||"bronze")+"</td><td>"+(c.visit_count||1)+"</td></tr>").join("");}catch(e){}}',
+    'async function loadRules(){try{const r=await fetch("/admin/list-rules"),data=await r.json(),tbody=document.getElementById("rulesList");if(!data.rules||!data.rules.length){tbody.innerHTML="<tr><td colspan=3 style=color:#336633>Sin reglas</td></tr>";return;}tbody.innerHTML=data.rules.map(rule=>"<tr><td style=color:#00ff88;font-weight:bold>"+rule.trigger+"</td><td>"+rule.response.substring(0,50)+"...</td><td><button class=btn-red onclick=deleteRule(\'"+rule.id+"\') style=padding:3px_8px;font-size:.7em>&#128465;</button></td></tr>").join("");}catch(e){}}',
+    'async function deleteRule(id){if(!confirm("Eliminar regla?"))return;try{const r=await fetch("/admin/delete-rule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});const d=await r.json();if(d.ok)loadRules();}catch(e){}}',
+    'async function saveRule(){const trigger=document.getElementById("rule-trigger").value.trim(),response=document.getElementById("rule-response").value.trim(),status=document.getElementById("rule-status");if(!trigger||!response){status.textContent="Completa ambos campos";return;}try{const r=await fetch("/admin/save-rule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({trigger,response})});const d=await r.json();status.textContent=d.ok?"OK: "+d.message:"ERROR: "+d.error;if(d.ok){document.getElementById("rule-trigger").value="";document.getElementById("rule-response").value="";loadRules();}}catch(e){status.textContent="Error de red";}setTimeout(()=>{document.getElementById("rule-status").textContent="";},3000);}',
+    'async function sendChat(){const input=document.getElementById("chat-input"),box=document.getElementById("chat-box"),msg=input.value.trim();if(!msg)return;input.value="";const u=document.createElement("div");u.className="msg-user";u.textContent=msg;box.appendChild(u);box.scrollTop=box.scrollHeight;try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg,session_id:"dashboard-baxto"})});const d=await r.json();const b=document.createElement("div");b.className="msg-bot";b.textContent=d.reply||d.respuesta||"—";box.appendChild(b);box.scrollTop=box.scrollHeight;}catch(e){const b=document.createElement("div");b.className="msg-bot";b.textContent="Error de conexion";box.appendChild(b);}}',
+    'async function updatePrompt(){const prompt=document.getElementById("promptEditor").value.trim(),status=document.getElementById("status");if(!prompt){status.textContent="Prompt vacio";return;}try{const r=await fetch("/admin/update-prompt",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({system_prompt_override:prompt})});const d=await r.json();status.textContent=d.ok?"Prompt actualizado":"Error";}catch(e){status.textContent="Error de red";}setTimeout(()=>{document.getElementById("status").textContent="";},3000);}',
+    'async function loadKillSwitch(){try{const r=await fetch("/admin/kill-switch-status"),d=await r.json(),on=d.active!==false;document.getElementById("ks-toggle").checked=on;document.getElementById("ks-label").textContent=on?"BRA ACTIVO":"BRA INACTIVO";}catch(e){}}',
+    'async function toggleKS(){const on=document.getElementById("ks-toggle").checked;document.getElementById("ks-label").textContent=on?"BRA ACTIVO":"BRA INACTIVO";try{await fetch("/admin/kill-switch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({active:on})});}catch(e){}}',
+    'async function triggerDeploy(){const btn=document.getElementById("deploy-btn"),st=document.getElementById("deploy-status");btn.disabled=true;btn.textContent="DEPLOYING...";st.textContent="";try{const r=await fetch("/admin/deploy",{method:"POST",headers:{"Content-Type":"application/json"}});const d=await r.json();if(d.ok){st.textContent="Deploy iniciado";setTimeout(()=>{btn.disabled=false;btn.textContent="TRIGGER DEPLOY";st.textContent="";},15000);}else{st.textContent="Error: "+(d.error||"?");setTimeout(()=>{btn.disabled=false;btn.textContent="TRIGGER DEPLOY";},5000);}}catch(e){st.textContent="Error de red";setTimeout(()=>{btn.disabled=false;btn.textContent="TRIGGER DEPLOY";},5000);}}',
+    'loadMetrics();loadCustomers();loadRules();loadKillSwitch();setInterval(loadMetrics,30000);',
+    '<\/script>',
+    '</body></html>'
+  ].join('\n');
+  return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
 }
 
-async function loadCustomers() {
-  try {
-    const r = await fetch('/api/customers');
-    const data = await r.json();
-    const tbody = document.getElementById('customerList');
-    if (!data.customers || !data.customers.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:#7ab8d4">Sin clientes</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.customers.map(c => '<tr><td style="color:#7ab8d4">' + c.customer_id.slice(-6) + '</td><td style="color:#d0eaff">' + (c.name||'—') + '</td><td class="tier-' + (c.tier||'bronze') + '">' + (c.tier||'bronze') + '</td><td style="color:#d0eaff">' + (c.visit_count||1) + '</td><td style="color:#7ab8d4">' + new Date((c.last_visit||0)*1000).toLocaleDateString() + '</td></tr>').join('');
-  } catch(e) { console.error('loadCustomers:', e); }
-}
-
-async function loadRules() {
-    try {
-      const r = await fetch('/admin/list-rules');
-      const data = await r.json();
-      const tbody = document.getElementById('rulesList');
-      if (!data.rules.length) {
-        tbody.innerHTML = '<tr><td colspan="3" style="color:#7ab8d4">Sin reglas guardadas</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.rules.map(rule => '<tr><td style="color:#00f5ff;font-weight:bold">' + rule.trigger + '</td><td style="color:#d0eaff">' + rule.response.substring(0,60) + '...</td><td><button onclick="deleteRule(\'' + rule.id + '\')" style="background:#ff003c;padding:4px 10px;font-size:.75em">🗑️</button></td></tr>').join('');
-    } catch(e) { console.error(e); }
-  }
-
-  async function deleteRule(id) {
-    if (!confirm('¿Eliminar esta regla?')) return;
-    try {
-      const r = await fetch('/admin/delete-rule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      });
-      const data = await r.json();
-      if (data.ok) loadRules();
-    } catch(e) {}
-  }
-
-async function saveRule() {
-    const trigger = document.getElementById('rule-trigger').value.trim();
-    const response = document.getElementById('rule-response').value.trim();
-    const status = document.getElementById('rule-status');
-    if (!trigger || !response) { status.textContent = '⚠️ Completa ambos campos'; return; }
-    try {
-      const r = await fetch('/admin/save-rule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trigger, response })
-      });
-      const data = await r.json();
-      if (data.ok) {
-        status.textContent = '✅ Regla guardada'; loadRules();
-        document.getElementById('rule-trigger').value = '';
-        document.getElementById('rule-response').value = '';
-      } else {
-        status.textContent = '❌ Error: ' + data.error;
-      }
-    } catch(e) { status.textContent = '❌ Error de red'; }
-    setTimeout(() => { status.textContent = ''; }, 3000);
-  }
-async function triggerDeploy(){
-  const btn=document.getElementById('deploy-btn');
-  const st=document.getElementById('deploy-status');
-  btn.disabled=true;
-  btn.textContent='⏳ Deploying...';
-  st.style.color='#ffaa00';
-  st.textContent='Enviando a GitHub Actions...';
-  try{
-    const r=await fetch('/admin/deploy',{method:'POST'});
-    const d=await r.json();
-    if(d.ok){
-      btn.textContent='✅ Done';
-      st.style.color='#00ff88';
-      st.textContent='Deploy iniciado — listo en ~30s';
-      setTimeout(()=>{btn.disabled=false;btn.textContent='🚀 Deploy';st.textContent='';},15000);
-    } else {
-      btn.textContent='❌ Error';
-      st.style.color='#ff4444';
-      st.textContent=d.error||'Error desconocido';
-      setTimeout(()=>{btn.disabled=false;btn.textContent='🚀 Deploy';},5000);
-    }
-  }catch(e){
-    btn.textContent='❌ Error';
-    st.textContent=e.message;
-    setTimeout(()=>{btn.disabled=false;btn.textContent='🚀 Deploy';},5000);
-  }
-}
-loadKillSwitch();
-</script>
-</body>
-</html>`;
-}
 
 // ============================================================================
 // WHATSAPP

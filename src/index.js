@@ -591,6 +591,14 @@ button:hover{background:#7c00cc;box-shadow:0 0 12px rgba(157,0,255,.4);}
   <div id="status"></div>
 </div>
 <div class="section" style="margin-top:1rem">
+  <h2>💬 Chat con BRA GT</h2>
+  <div id="chat-box" style="background:#0a0a0a;border:1px solid #333;border-radius:8px;height:220px;overflow-y:auto;padding:.8rem;margin-bottom:.8rem;font-size:.9rem;display:flex;flex-direction:column;gap:.5rem"></div>
+  <div style="display:flex;gap:.5rem">
+    <input id="chat-input" type="text" placeholder="Escribe un mensaje..." style="flex:1;background:#111;border:1px solid #444;color:#fff;padding:.6rem .8rem;border-radius:8px;font-size:.95rem" onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()" style="background:#00ff88;color:#000;border:none;padding:.6rem 1.2rem;border-radius:8px;font-weight:bold;cursor:pointer">➤</button>
+  </div>
+</div>
+<div class="section" style="margin-top:1rem">
   <h2>🚀 Deploy</h2>
   <button id="deploy-btn" onclick="triggerDeploy()" style="background:#ff6b00;color:#fff;border:none;padding:.7rem 1.5rem;border-radius:8px;font-size:1rem;cursor:pointer">🚀 Deploy</button>
   <span id="deploy-status" style="margin-left:1rem;font-size:.95rem"></span>
@@ -647,6 +655,36 @@ async function toggleKillSwitch(){
   const on=document.getElementById('ks-toggle').checked;
   await fetch('/admin/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({active:on})});
   document.getElementById('ks-label').textContent=on?'🔵 BRA ON':'⚫ BRA OFF';
+}
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const box=document.getElementById('chat-box');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  const userDiv=document.createElement('div');
+  userDiv.style.cssText='align-self:flex-end;background:#1a1a2e;color:#00ff88;padding:.4rem .8rem;border-radius:12px 12px 2px 12px;max-width:80%';
+  userDiv.textContent='Baxto: '+msg;
+  box.appendChild(userDiv);
+  box.scrollTop=box.scrollHeight;
+  const thinkDiv=document.createElement('div');
+  thinkDiv.style.cssText='align-self:flex-start;color:#666;font-style:italic;font-size:.85rem';
+  thinkDiv.textContent='BRA GT escribiendo...';
+  box.appendChild(thinkDiv);
+  box.scrollTop=box.scrollHeight;
+  try{
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Session-Id':'dashboard-baxto'},
+      body:JSON.stringify({message:msg})
+    });
+    const d=await r.json();
+    thinkDiv.style.cssText='align-self:flex-start;background:#111;color:#e0e0e0;padding:.4rem .8rem;border-radius:12px 12px 12px 2px;max-width:80%';
+    thinkDiv.textContent='BRA: '+(d.reply||d.error||'Sin respuesta');
+  }catch(e){
+    thinkDiv.textContent='❌ Error: '+e.message;
+  }
+  box.scrollTop=box.scrollHeight;
 }
 async function triggerDeploy(){
   const btn=document.getElementById('deploy-btn');

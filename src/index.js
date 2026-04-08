@@ -826,7 +826,8 @@ async function handleRequest(request, env) {
         headers: {
           'Authorization': `Bearer ${env.TOKE_420}`,
           'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'User-Agent': 'BRA-GT-Dashboard/1.0'
         },
         body: JSON.stringify({ ref: 'main' })
       });

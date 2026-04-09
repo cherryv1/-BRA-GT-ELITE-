@@ -277,7 +277,8 @@ async function sendMessage() {
  body: JSON.stringify({ 
  message: enhancedMessage, 
  history: historyForWorker,
- phone: phoneId
+ phone: phoneId,
+ customer_id: phoneId
  })
  });
  const data = await res.json();

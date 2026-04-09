@@ -363,6 +363,13 @@ async function chatWithMemory(env, sessionId, customerId, message) {
       if (zoMatch) sd.context.zona = zoMatch[0];
       if (cmMatch) sd.context.tamano = cmMatch[1] + 'cm';
       sd.history.push({ role: 'user', content: message }, { role: 'assistant', content: intentResult.reply });
+      // Guardar cliente en D1
+      const nameMatch = message.match(/(?:me llamo|soy|mi nombre es)\s+([A-Za-záéíóúñÑ]+)/i);
+      if (nameMatch) {
+        try { await upsertCustomerProfile(env, customerId, nameMatch[1]); } catch(e) {}
+      } else {
+        try { await upsertCustomerProfile(env, customerId, null); } catch(e) {}
+      }
       await env.SESSIONS.put(`sess:${sessionId}`, JSON.stringify(sd), { expirationTtl: 86400 });
       return { reply: intentResult.reply, model: intentResult.model, tier: 'bronze', session_id: sessionId };
     }

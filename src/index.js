@@ -885,7 +885,7 @@ async function handleRequest(request, env) {
       const [metrics, customers] = await Promise.all([
         env.DB.prepare(`
           SELECT
-            COUNT(DISTINCT customer_id) as totalClientes,
+            (SELECT COUNT(*) FROM customer_profiles) as totalClientes,
             SUM(conversion_flag) as totalConversiones,
             AVG(engagement_score) as engagementPromedio,
             (SUM(conversion_flag)*100.0/COUNT(*)) as tasaConversion

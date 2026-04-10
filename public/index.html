@@ -170,6 +170,7 @@ async function enviarCotizacion(formId) {
   const file = window._pendingFile;
   if (!file) return;
   if (!nombre) { document.getElementById('cf-nombre').style.border='1px solid #ff4444'; return; }
+  const container = document.getElementById('chat-msgs');
   const formDiv = document.getElementById(formId);
   if (formDiv) formDiv.remove();
   addMessage('user', `📎 ${nombre} · ${cm}cm · ${zona}`);

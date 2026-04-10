@@ -141,45 +141,91 @@ let pendingImageUrl = null;
 async function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
+  const previewUrl = URL.createObjectURL(file);
+  const formId = 'cotiza-form-' + Date.now();
+  const container = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'cmsg lily';
+  div.id = formId;
+  div.innerHTML = `
+    <div class="cav">GT</div>
+    <div class="cbub" style="padding:14px;min-width:240px">
+      <div style="font-size:.85rem;color:#00f5ff;letter-spacing:.1em;margin-bottom:10px">📋 COMPLETA TU COTIZACIÓN</div>
+      <img src="${previewUrl}" style="width:100%;border-radius:10px;margin-bottom:10px;max-height:180px;object-fit:cover">
+      <input id="cf-nombre" placeholder="Tu nombre 👤" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(0,245,255,.2);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;margin-bottom:6px;box-sizing:border-box">
+      <input id="cf-cm" placeholder="Centímetros aproximados 📏" type="number" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(0,245,255,.2);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;margin-bottom:6px;box-sizing:border-box">
+      <input id="cf-zona" placeholder="Zona del cuerpo 📍" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(0,245,255,.2);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;margin-bottom:10px;box-sizing:border-box">
+      <button onclick="enviarCotizacion('${formId}')" style="width:100%;background:linear-gradient(135deg,#7c4dff,#9d00ff);border:none;padding:10px;border-radius:10px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.1em">Analizar con BRA 🍇</button>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  window._pendingFile = file;
+  event.target.value = '';
+}
+
+async function enviarCotizacion(formId) {
+  const nombre = document.getElementById('cf-nombre')?.value.trim() || '';
+  const cm = document.getElementById('cf-cm')?.value.trim() || '';
+  const zona = document.getElementById('cf-zona')?.value.trim() || '';
+  const file = window._pendingFile;
+  if (!file) return;
+  if (!nombre) { document.getElementById('cf-nombre').style.border='1px solid #ff4444'; return; }
+  const formDiv = document.getElementById(formId);
+  if (formDiv) formDiv.remove();
+  addMessage('user', `📎 ${nombre} · ${cm}cm · ${zona}`);
   const btn = document.getElementById('uvaBtn');
   btn.classList.add('spinning');
-  addMessage('user', '📎 Analizando imagen de referencia...');
-  // Subir a imgbb
-  const formData = new FormData();
-  formData.append('image', file);
   try {
-    const uploadRes = await fetch('/api/upload-image', {
-      method: 'POST',
-      body: formData
-    });
+    const formData = new FormData();
+    formData.append('image', file);
+    const uploadRes = await fetch('/api/upload-image', { method: 'POST', body: formData });
     const uploadData = await uploadRes.json();
     if (!uploadData.url) throw new Error('Upload falló');
-    const imageUrl = uploadData.url;
-    // Analizar con Groq Vision
     const res = await fetch('/api/analyze-image', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({image_url: imageUrl})
+      body: JSON.stringify({image_url: uploadData.url})
     });
     const data = await res.json();
     btn.classList.remove('spinning');
     if (data.ok && data.analysis) {
       const a = data.analysis;
-      // Actualizar botón WhatsApp con contexto
-      const nombre = findNameInHistory() || '';
-      const waText = encodeURIComponent(`Hola Baxto! ${nombre ? 'Soy '+nombre+'. ' : ''}Quiero cotizar un diseño de ${a.descripcion}, estilo ${a.estilo}, ~${a.tamano_sugerido_cm}cm en ${a.zona_sugerida} 🖤`);
+      const waText = encodeURIComponent(`Hola Baxto! Soy ${nombre}. Quiero cotizar: ${a.descripcion}, estilo ${a.estilo}, ~${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida} 🖤`);
       const waBtn = document.getElementById('waBtn');
       if (waBtn) waBtn.href = `https://wa.me/5219842562365?text=${waText}`;
-      const msg = `🍇 *Análisis de tu referencia*\n\n🎨 Estilo: ${a.estilo}\n📍 Zona sugerida: ${a.zona_sugerida}\n📏 Tamaño: ~${a.tamano_sugerido_cm}cm\n⚡ Complejidad: ${a.complejidad}/10\n🖊️ ${a.descripcion}\n\n💡 *Sugerencia Baxto:* ${a.sugerencia_baxto}\n\n¿Quieres que Baxto te cotice este diseño? 🖤`;
-      addMessage('bot', msg);
+      const checks = [
+        `<span style="color:#00ff88">✅</span> Nombre: <b>${nombre}</b>`,
+        `<span style="color:#7c4dff">✅</span> Tamaño: <b>${cm||a.tamano_sugerido_cm}cm</b>`,
+        `<span style="color:#00f5ff">✅</span> Zona: <b>${zona||a.zona_sugerida}</b>`,
+        `<span style="color:#ffd700">✅</span> Diseño: <b>${a.descripcion}</b>`
+      ].join('<br>');
+      const resDiv = document.createElement('div');
+      resDiv.className = 'cmsg lily';
+      resDiv.innerHTML = `<div class="cav">GT</div><div class="cbub" style="padding:14px">
+        <div style="font-size:.8rem;color:#9d00ff;letter-spacing:.1em;margin-bottom:8px">🍇 ANÁLISIS COMPLETADO</div>
+        <div style="font-size:.88rem;line-height:1.8;margin-bottom:10px">${checks}</div>
+        <div style="font-size:.8rem;color:#3a5a7a;margin-bottom:4px">🎨 Estilo: ${a.estilo} · ⚡ Complejidad: ${a.complejidad}/10</div>
+        <div style="font-size:.8rem;color:#7c4dff;margin-top:6px">💡 ${a.sugerencia_baxto}</div>
+        <div style="margin-top:12px;padding:8px;background:rgba(157,0,255,.1);border-radius:8px;font-size:.82rem;color:#e0f0ff;text-align:center">🦾 2do NIVEL desbloqueado<br><span style="font-size:.75rem;color:#3a5a7a">Baxto tiene todo para cotizarte</span></div>
+      </div>`;
+      container.appendChild(resDiv);
+      container.scrollTop = container.scrollHeight;
+      await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          message: `[Contexto: Cliente ${nombre} tiene imagen analizada. Diseño: ${a.descripcion}, estilo ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]`,
+          phone: getPhoneId(),
+          customer_id: getPhoneId()
+        })
+      });
     } else {
-      addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto más clara.');
+      addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
     }
   } catch(e) {
     btn.classList.remove('spinning');
     addMessage('bot', '❌ Error: ' + e.message);
   }
-  event.target.value = '';
 }
 document.addEventListener('DOMContentLoaded', () => { 
  initNeural(); 

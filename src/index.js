@@ -874,6 +874,26 @@ async function handleRequest(request, env) {
     }
   }
 
+// POST /api/upload-image — sube imagen a imgbb, devuelve URL pública
+  if (path === '/api/upload-image' && request.method === 'POST') {
+    try {
+      const formData = await request.formData();
+      const imageFile = formData.get('image');
+      if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
+      const uploadForm = new FormData();
+      uploadForm.append('image', imageFile);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${env.IMGBB_KEY}`, {
+        method: 'POST',
+        body: uploadForm
+      });
+      const data = await res.json();
+      if (!data.success) return jsonRes({ error: 'imgbb error', detail: data }, 500);
+      return jsonRes({ ok: true, url: data.data.url });
+    } catch(e) {
+      return jsonRes({ error: e.message }, 500);
+    }
+  }
+
 // POST /api/analyze-image — Gemini Vision analiza foto de referencia
   if (path === '/api/analyze-image' && request.method === 'POST') {
     try {

@@ -883,8 +883,11 @@ async function handleRequest(request, env) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
       const mimeType = imageFile.type || 'image/jpeg';
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+      const geminiKeys = [env.GEMINI_API_KEY, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean);
+      let geminiRes, geminiData;
+      for (const key of geminiKeys) {
+        geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -909,7 +912,9 @@ Responde SOLO el JSON, sin texto adicional.` },
           })
         }
       );
-      const geminiData = await geminiRes.json();
+        geminiData = await geminiRes.json();
+        if (!geminiData.error || geminiData.error.code !== 429) break;
+      }
       const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
       if (!geminiData.candidates) return jsonRes({ error: 'Gemini error', detail: geminiData }, 500);
       const clean = rawText.replace(/```json|```/g, '').trim();

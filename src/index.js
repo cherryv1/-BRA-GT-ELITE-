@@ -877,14 +877,21 @@ async function handleRequest(request, env) {
 // POST /api/analyze-image — Gemini Vision analiza foto de referencia
   if (path === '/api/analyze-image' && request.method === 'POST') {
     try {
-      const formData = await request.formData();
-      const imageFile = formData.get('image');
-      if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
-      const arrayBuffer = await imageFile.arrayBuffer();
-      const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-      const mimeType = imageFile.type || 'image/jpeg';
-      // Subir imagen como base64 data URL para Groq
-      const dataUrl = `data:${mimeType};base64,${base64Image}`;
+      let imageUrl;
+      const contentType = request.headers.get('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        const body = await request.json();
+        imageUrl = body.image_url;
+        if (!imageUrl) return jsonRes({ error: 'Falta image_url' }, 400);
+      } else {
+        const formData = await request.formData();
+        const imageFile = formData.get('image');
+        if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
+        const arrayBuffer = await imageFile.arrayBuffer();
+        const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        const mimeType = imageFile.type || 'image/jpeg';
+        imageUrl = `data:${mimeType};base64,${base64Image}`;
+      }
       const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -903,7 +910,7 @@ async function handleRequest(request, env) {
               },
               {
                 type: 'image_url',
-                image_url: { url: dataUrl }
+                image_url: { url: imageUrl }
               }
             ]
           }],

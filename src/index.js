@@ -884,7 +884,7 @@ async function handleRequest(request, env) {
       const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
       const mimeType = imageFile.type || 'image/jpeg';
       const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

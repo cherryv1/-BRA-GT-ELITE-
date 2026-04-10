@@ -874,6 +874,81 @@ async function handleRequest(request, env) {
     }
   }
 
+// POST /api/analyze-image — Gemini Vision analiza foto de referencia
+  if (path === '/api/analyze-image' && request.method === 'POST') {
+    try {
+      const formData = await request.formData();
+      const imageFile = formData.get('image');
+      if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const mimeType = imageFile.type || 'image/jpeg';
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: `Eres experto en tatuajes. Analiza esta imagen de referencia y responde en español con exactamente este formato JSON:
+{
+  "estilo": "nombre del estilo (blackwork/realismo/tradicional/neo-tradicional/geometrico/etc)",
+  "zona_sugerida": "parte del cuerpo recomendada",
+  "tamano_sugerido_cm": número estimado,
+  "complejidad": número del 1 al 10,
+  "colores": "negro/color/ambos",
+  "descripcion": "descripción breve del diseño en 1 oración",
+  "sugerencia_baxto": "mejora o adaptación al estilo Baxto en 1 oración"
+}
+Responde SOLO el JSON, sin texto adicional.` },
+                { inline_data: { mime_type: mimeType, data: base64Image } }
+              ]
+            }],
+            generationConfig: { temperature: 0.3 }
+          })
+        }
+      );
+      const geminiData = await geminiRes.json();
+      const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      const analysis = JSON.parse(clean);
+      return jsonRes({ ok: true, analysis });
+    } catch(e) {
+      return jsonRes({ error: e.message }, 500);
+    }
+  }
+
+  // POST /api/generate-mockup — DALL-E 3 genera mockup del tatuaje
+  if (path === '/api/generate-mockup' && request.method === 'POST') {
+    try {
+      const body = await request.json();
+      const { descripcion, zona, estilo, tamano_cm } = body;
+      if (!descripcion) return jsonRes({ error: 'Falta descripción' }, 400);
+      const prompt = `Professional tattoo mockup on ${zona||'arm'}: ${descripcion}. Style: ${estilo||'blackwork'}. Size approximately ${tamano_cm||10}cm. Clean skin, studio lighting, photorealistic, 4K quality. Small watermark "Baxto Style Tattoo" bottom right corner.`;
+      const dalleRes = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt,
+          size: '1024x1024',
+          quality: 'hd',
+          n: 1
+        })
+      });
+      const dalleData = await dalleRes.json();
+      if (dalleData.error) return jsonRes({ error: dalleData.error.message }, 500);
+      const imageUrl = dalleData.data?.[0]?.url;
+      return jsonRes({ ok: true, image_url: imageUrl, prompt_used: prompt });
+    } catch(e) {
+      return jsonRes({ error: e.message }, 500);
+    }
+  }
+
 // GET /dashboard
   if (path === '/dashboard' && request.method === 'GET') {
     return getDashboardHTML();

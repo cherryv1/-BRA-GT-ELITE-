@@ -911,6 +911,7 @@ Responde SOLO el JSON, sin texto adicional.` },
       );
       const geminiData = await geminiRes.json();
       const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      if (!geminiData.candidates) return jsonRes({ error: 'Gemini error', detail: geminiData }, 500);
       const clean = rawText.replace(/```json|```/g, '').trim();
       const analysis = JSON.parse(clean);
       return jsonRes({ ok: true, analysis });

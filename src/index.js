@@ -883,43 +883,41 @@ async function handleRequest(request, env) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
       const mimeType = imageFile.type || 'image/jpeg';
-      const geminiKeys = [env.GEMINI_API_KEY, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean);
-      let geminiRes, geminiData;
-      for (const key of geminiKeys) {
-        geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: `Eres experto en tatuajes. Analiza esta imagen de referencia y responde en español con exactamente este formato JSON:
-{
-  "estilo": "nombre del estilo (blackwork/realismo/tradicional/neo-tradicional/geometrico/etc)",
-  "zona_sugerida": "parte del cuerpo recomendada",
-  "tamano_sugerido_cm": número estimado,
-  "complejidad": número del 1 al 10,
-  "colores": "negro/color/ambos",
-  "descripcion": "descripción breve del diseño en 1 oración",
-  "sugerencia_baxto": "mejora o adaptación al estilo Baxto en 1 oración"
-}
-Responde SOLO el JSON, sin texto adicional.` },
-                { inline_data: { mime_type: mimeType, data: base64Image } }
-              ]
-            }],
-            generationConfig: { temperature: 0.3 }
-          })
-        }
-      );
-        geminiData = await geminiRes.json();
-        if (!geminiData.error || geminiData.error.code !== 429) break;
-      }
-      const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-      if (!geminiData.candidates) return jsonRes({ error: 'Gemini error', detail: geminiData }, 500);
+      // Subir imagen como base64 data URL para Groq
+      const dataUrl = `data:${mimeType};base64,${base64Image}`;
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `Eres experto en tatuajes. Analiza esta imagen y responde SOLO un JSON válido sin texto adicional:
+{"estilo":"blackwork/realismo/tradicional/neo-tradicional/geometrico/otro","zona_sugerida":"parte del cuerpo","tamano_sugerido_cm":10,"complejidad":7,"colores":"negro/color/ambos","descripcion":"descripción breve","sugerencia_baxto":"sugerencia de adaptación al estilo Baxto"}`
+              },
+              {
+                type: 'image_url',
+                image_url: { url: dataUrl }
+              }
+            ]
+          }],
+          temperature: 0.3,
+          max_tokens: 500,
+          response_format: { type: 'json_object' }
+        })
+      });
+      const groqData = await groqRes.json();
+      if (groqData.error) return jsonRes({ error: 'Groq Vision error', detail: groqData.error }, 500);
+      const rawText = groqData.choices?.[0]?.message?.content || '{}';
       const clean = rawText.replace(/```json|```/g, '').trim();
       const analysis = JSON.parse(clean);
-      return jsonRes({ ok: true, analysis });
+      return jsonRes({ ok: true, analysis, model: 'llama-4-scout-vision' });
     } catch(e) {
       return jsonRes({ error: e.message }, 500);
     }

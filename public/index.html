@@ -18,6 +18,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
 .logo-hex-inner{position:absolute;inset:4px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;}
 .logo-hex-inner img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
 @keyframes hex-spin{to{transform:rotate(360deg)}}
+@keyframes uva-spin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+@keyframes van-appear{0%{opacity:0;transform:translateY(-4px)}100%{opacity:1;transform:translateY(0)}}
+.uva-btn{background:linear-gradient(135deg,#7c4dff,#9d00ff);border:none;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;transition:box-shadow .3s;}
+.uva-btn:hover{box-shadow:0 0 15px #9d00ff;}
+.uva-emoji{font-size:18px;transition:transform .1s;display:block;line-height:1;}
+.uva-btn.spinning .uva-emoji{animation:uva-spin .8s ease-in-out;}
+.uva-label{font-size:6px;letter-spacing:.15em;color:rgba(255,255,255,.7);font-family:'Courier New',monospace;font-weight:700;display:block;line-height:1;}
+.uva-btn.spinning .uva-label{animation:van-appear .4s ease forwards;}
+.file-input-hidden{display:none;}
+.attach-btn{background:none;border:none;cursor:pointer;font-size:18px;opacity:.6;transition:opacity .3s;padding:4px;}
+.attach-btn:hover{opacity:1;}
 .hero-name{font-family:'Orbitron', sans-serif;line-height:1.1;margin-bottom:15px;z-index:20;}
 .hn-baxto{display:block;font-size:clamp(32px, 10vw, 52px);font-weight:700;color:#fff;text-shadow:0 0 10px var(--c1);letter-spacing:4px;text-transform:uppercase;}
 .hn-tattoo{display:block;font-size:clamp(20px, 6vw, 30px);color:var(--c1);font-weight:400;letter-spacing:12px;margin-top:5px;text-transform:uppercase;}
@@ -96,7 +107,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
 </div>
 <div class="modal-overlay" id="galModal"><div class="modal-box"><div class="modal-head"><span class="modal-title">DETALLES</span><button class="modal-close" onclick="closeModal('galModal')">&times;</button></div><div class="modal-body" id="galModalBody" style="padding:0;"></div></div></div>
 <div class="modal-overlay" id="infoModal"><div class="modal-box"><div class="modal-head"><span class="modal-title" id="infoTitle">INFO</span><button class="modal-close" onclick="closeModal('infoModal')">&times;</button></div><div class="modal-body" id="infoBody"></div></div></div>
-<div class="modal-overlay" id="chatModal"><div class="modal-box" style="height:80vh;"><div class="modal-head"><div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;background:var(--c4);border-radius:50%;"></div><span class="modal-title">BRA GT · ONLINE</span></div><button class="modal-close" onclick="closeChat()">&times;</button></div><div id="chat-msgs"></div><div class="chat-inp-wrap"><div class="chat-inp-box"><textarea id="chatInput" placeholder="Escribe un mensaje..." rows="1"></textarea><button class="csend" onclick="sendMessage()"><svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button></div></div></div></div>
+<div class="modal-overlay" id="chatModal"><div class="modal-box" style="height:80vh;"><div class="modal-head"><div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;background:var(--c4);border-radius:50%;"></div><span class="modal-title">BRA GT · ONLINE</span></div><button class="modal-close" onclick="closeChat()">&times;</button></div><div id="chat-msgs"></div><div class="chat-inp-wrap"><div class="chat-inp-box"><textarea id="chatInput" placeholder="Escribe un mensaje..." rows="1"></textarea><input type="file" id="imageInput" class="file-input-hidden" accept="image/*" onchange="handleImageUpload(event)">
+<button class="attach-btn" onclick="document.getElementById('imageInput').click()" title="Enviar foto de referencia">📎</button>
+<button class="uva-btn" id="uvaBtn" onclick="sendMessage()"><span class="uva-emoji">🍇</span><span class="uva-label">VAN¹</span></button></div></div></div></div>
 <script>
 const IMAGES = [
  { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
@@ -123,6 +136,47 @@ function getPhoneId() {
 }
 // 🔧 HISTORIAL LOCAL - Para mantener contexto visual en el chat
 let chatHistory = [];
+let pendingImageUrl = null;
+
+async function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const btn = document.getElementById('uvaBtn');
+  btn.classList.add('spinning');
+  addMessage('user', '📎 Analizando imagen de referencia...');
+  // Subir a imgbb
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const upload = await fetch('https://api.imgbb.com/1/upload?key=YOUR_IMGBB_KEY', {
+      method: 'POST',
+      body: formData
+    });
+    // Si no hay imgbb key, usar análisis directo con FormData
+    throw new Error('use_formdata');
+  } catch(e) {
+    // Fallback: enviar FormData directo al worker
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await fetch('/api/analyze-image', { method: 'POST', body: fd });
+      const data = await res.json();
+      btn.classList.remove('spinning');
+      if (data.ok && data.analysis) {
+        const a = data.analysis;
+        const msg = `🍇 Análisis completado:\n\n🎨 Estilo: ${a.estilo}\n📍 Zona: ${a.zona_sugerida}\n📏 Tamaño: ${a.tamano_sugerido_cm}cm\n⚡ Complejidad: ${a.complejidad}/10\n🖊️ ${a.descripcion}\n\n💡 Sugerencia Baxto: ${a.sugerencia_baxto}\n\n¿Quieres ver un mockup de este diseño?`;
+        addMessage('bot', msg);
+        pendingImageUrl = null;
+      } else {
+        addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
+      }
+    } catch(err) {
+      btn.classList.remove('spinning');
+      addMessage('bot', '❌ Error al procesar imagen: ' + err.message);
+    }
+  }
+  event.target.value = '';
+}
 document.addEventListener('DOMContentLoaded', () => { 
  initNeural(); 
  initParticles(); 

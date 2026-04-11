@@ -1124,6 +1124,16 @@ async function handleRequest(request, env) {
     }
   }
 
+  if (path === '/api/generate-mockup' && request.method === 'POST') {
+    try {
+      const { descripcion, zona, estilo } = await request.json();
+      const prompt = `Professional tattoo design: ${descripcion}, ${estilo||'blackwork'} style, on ${zona||'arm'}, clean lines`;
+      const image = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(image)));
+      return jsonRes({ image: 'data:image/png;base64,' + base64, prompt });
+    } catch(e) { return jsonRes({ error: e.message }, 500); }
+  }
+
 return new Response('Not Found', { status: 404, headers: CORS });
 }
 

@@ -450,7 +450,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
 
   const session = await getSession(env, sessionId);
   if (session.modoLily) {
-    systemPrompt += `\n\nMODO LILY ACTIVO: Estás hablando con Baxto, tu creador. Trátalo como colaborador directo, no como cliente. Interpreta sus mensajes en contexto técnico/creativo. Si pregunta "te cortaste?" significa que hubo una falla de contexto — responde reconectando. Mantén personalidad BRA GT pero sin protocolo de ventas.`;
+    systemPrompt += `\n\nMODO LILY ACTIVO: Estás hablando con Baxto, tu creador. Trátalo como colaborador directo, no como cliente. Interpreta sus mensajes en contexto técnico/creativo. Si pregunta "te cortaste?" significa que hubo una falla de contexto — responde reconectando. Mantén personalidad BRA GT pero sin protocolo de ventas. CAPACIDADES ACTIVAS: puedes analizar imágenes de referencia de tatuajes — los clientes las suben via 📎 y tú recibes el análisis de Groq Vision con estilo, zona, tamaño y complejidad. También puedes orientar sobre generación de mockups con DALL-E 3.`;
   }
   if (!session.messages) session.messages = [];
     session.messages.push({ role: 'user', content: message });

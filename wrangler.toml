@@ -11,8 +11,6 @@ database_name = "baxto-db"
 binding = "SESSIONS"
 id = "a136dcf8ea7f4d428a836f6763bb112f"
 
-[ai]
-binding = "AI"
 
 [triggers]
 crons = ["*/15 * * * *"]

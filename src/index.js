@@ -957,22 +957,8 @@ async function handleRequest(request, env) {
       const { descripcion, zona, estilo, tamano_cm } = body;
       if (!descripcion) return jsonRes({ error: 'Falta descripción' }, 400);
       const prompt = `Professional tattoo mockup on ${zona||'arm'}: ${descripcion}. Style: ${estilo||'blackwork'}. Size approximately ${tamano_cm||10}cm. Clean skin, studio lighting, photorealistic, 4K quality. Small watermark "Baxto Style Tattoo" bottom right corner.`;
-      const dalleRes = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'dall-e-3',
-          prompt,
-          size: '1024x1024',
-          quality: 'hd',
-          n: 1
-        })
-      });
-      const dalleData = await dalleRes.json();
-      if (dalleData.error) return jsonRes({ error: dalleData.error.message }, 500);
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+      const dalleData = { data: [{ url: pollinationsUrl }] };
       const imageUrl = dalleData.data?.[0]?.url;
       return jsonRes({ ok: true, image_url: imageUrl, prompt_used: prompt });
     } catch(e) {

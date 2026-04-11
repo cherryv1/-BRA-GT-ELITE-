@@ -908,7 +908,7 @@ async function handleRequest(request, env) {
         const imageFile = formData.get('image');
         if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
         const arrayBuffer = await imageFile.arrayBuffer();
-        const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      return jsonRes({ image: imgUrl, prompt });
         const mimeType = imageFile.type || 'image/jpeg';
         imageUrl = `data:${mimeType};base64,${base64Image}`;
       }
@@ -1128,9 +1128,9 @@ async function handleRequest(request, env) {
     try {
       const { descripcion, zona, estilo } = await request.json();
       const prompt = `Professional tattoo design: ${descripcion}, ${estilo||'blackwork'} style, on ${zona||'arm'}, clean lines`;
-      const image = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', { prompt });
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(image)));
-      return jsonRes({ image: 'data:image/png;base64,' + base64, prompt });
+      const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
+      return jsonRes({ image: imgUrl, prompt });
+
     } catch(e) { return jsonRes({ error: e.message }, 500); }
   }
 

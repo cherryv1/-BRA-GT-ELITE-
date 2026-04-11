@@ -316,6 +316,33 @@ function addMessage(role, text) {
  // Guardar en historial local
  chatHistory.push({role, text, time: Date.now()});
 }
+// 🎨 MOCKUP — cliente pide ver cómo quedaría
+async function generarMockup(descripcion, zona, estilo) {
+  addMessage('lily', '🎨 Generando mockup de tu tatuaje...');
+  try {
+    const res = await fetch('/api/generate-mockup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ descripcion, zona: zona||'brazo', estilo: estilo||'blackwork', tamano_cm: 10 })
+    });
+    const data = await res.json();
+    if (data.ok && data.image_url) {
+      const container = document.getElementById('chat-msgs');
+      const div = document.createElement('div');
+      div.className = 'cmsg lily';
+      div.innerHTML = `<div class="cav">GT</div><div class="cbub">
+        <div style="font-size:.8rem;color:#9d00ff;margin-bottom:8px">🎨 MOCKUP ORIENTATIVO</div>
+        <img src="${data.image_url}" style="width:100%;border-radius:8px;border:1px solid #7c4dff" loading="lazy"/>
+        <div style="font-size:.75rem;color:#3a5a7a;margin-top:6px">Vista previa generada por IA. El diseño final lo define Baxto.</div>
+      </div>`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+  } catch(e) {
+    addMessage('lily', 'No pude generar el mockup. Escríbele directo a Baxto 🖤');
+  }
+}
+
 // 🔧 FUNCIÓN CORREGIDA CON MEMORIA PERSISTENTE
 // 🔥 MEMORIA LOCAL: Extraer nombre del historial
 function findNameInHistory() {
@@ -337,6 +364,20 @@ function findNameInHistory() {
  return null;
 }
 async function sendMessage() {
+  const inputCheck = document.getElementById('chatInput');
+  const textCheck = inputCheck ? inputCheck.value.trim() : '';
+  // Detectar si cliente pide mockup
+  if (/muéstrame|muestrame|cómo quedaría|como quedaria|preview|mockup|ver el diseño|ver diseño/i.test(textCheck)) {
+    inputCheck.value = '';
+    const nombre = findNameInHistory() || 'Cliente';
+    // Buscar diseño y zona del historial
+    const hist = chatHistory.map(m => m.text).join(' ');
+    const dis = (hist.match(/rosa|lobo|mariposa|flor|calavera|letra|nombre|frase|aguila|dragon|tribal|mandala/i)||[])[0]||'tatuaje';
+    const zon = (hist.match(/brazo|mano|pierna|espalda|pecho|cuello|tobillo|antebrazo/i)||[])[0]||'brazo';
+    addMessage('user', textCheck);
+    await generarMockup(dis, zon, 'blackwork');
+    return;
+  }
  const input = document.getElementById('chatInput');
  const text = input.value.trim();
  if (!text) return;

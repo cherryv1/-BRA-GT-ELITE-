@@ -1327,7 +1327,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
  <div style="font-size:10px;letter-spacing:.3em;color:rgba(160,200,255,.7);text-transform:uppercase;margin-bottom:15px;">Playa del Carmen · Quintana Roo</div>
  <div class="hero-phrase" id="phrase"></div>
  <div class="lily-avatar-wrap" onclick="openChat()">
- <img src="https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/avatar-lily.png" class="lily-avatar-img">
+ <img src="https://i.ibb.co/VY6vPvq9/avatar-lily.png" class="lily-avatar-img">
  <span class="lily-av-name">BRA GT</span>
  <span style="font-size:10px;letter-spacing:.15em;color:rgba(191,148,255,.6);">⚜️ Asistente IA · Toca para chatear</span>
  </div>
@@ -1368,11 +1368,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
 
 <script>
 const IMAGES = [
- { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
- { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_154348790.jpg', label: 'Neo Tradicional · Color Vibrante · Aguja 7RL' },
- { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_161221693.jpg', label: 'Lettering · Script Fluido · Trazo Limpio' },
- { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_161812794.jpg', label: 'Custom Design · Alma Artística' },
- { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_162704690.jpg', label: 'Realismo · Sombra y Textura' },
+ { url: 'https://i.ibb.co/xq5vdPvG/In-Shot-20260318-153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
+ { url: 'https://i.ibb.co/Y4zL61nH/In-Shot-20260318-154348790.jpg', label: 'Neo Tradicional · Color Vibrante · Aguja 7RL' },
+ { url: 'https://i.ibb.co/whrgVx5C/In-Shot-20260318-161221693.jpg', label: 'Lettering · Script Fluido · Trazo Limpio' },
+ { url: 'https://i.ibb.co/bRQc9tW5/In-Shot-20260318-161812794.jpg', label: 'Custom Design · Alma Artística' },
+ { url: 'https://i.ibb.co/RGGFjR1d/In-Shot-20260318-162704690.jpg', label: 'Realismo · Sombra y Textura' },
  { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1773541647082.jpeg', label: 'Dark Art Fusion · Cyberpunk Soul' }
 ];
 const INFO_CONTENT = {

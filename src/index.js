@@ -802,10 +802,7 @@ async function handleRequest(request, env) {
   // GET / — Sirve el HTML del frontend desde GitHub raw
   if (path === '/' && request.method === 'GET') {
     try {
-      const htmlUrl = 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/index.html';
-      const response = await fetch(htmlUrl);
-      if (!response.ok) throw new Error('GitHub fetch failed');
-      const html = await response.text();
+      const html = getFrontendHTML();
       return new Response(html, {
         headers: { ...CORS, 'Content-Type': 'text/html;charset=UTF-8' }
       });
@@ -1237,6 +1234,593 @@ async function initDB(env) {
   } catch(e) {
     return { ok: false, error: e.message };
   }
+}
+
+function getFrontendHTML() {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Baxto Style Tattoo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--bg:#000308;--c1:#00e5ff;--c2:#7c4dff;--c3:#ff1744;--c4:#00e676;--c5:#ffd740;--border:rgba(0,229,255,0.15);--text:#e8f4f8;--muted:#4a7a8a;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;touch-action:manipulation;}
+#particles,#energy{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#neural{position:fixed;inset:0;z-index:-1;opacity:0.4;}
+#main{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;}
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;position:relative;}
+.logo-container{position:relative;width:140px;height:140px;margin:0 auto 20px;z-index:20;}
+.logo-hex{width:140px;height:140px;background:conic-gradient(var(--c1),var(--c2),var(--c3),var(--c4),var(--c5),var(--c1));border-radius:50%;animation:hex-spin 6s linear infinite;position:absolute;inset:0;}
+.logo-hex-inner{position:absolute;inset:4px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;}
+.logo-hex-inner img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+@keyframes hex-spin{to{transform:rotate(360deg)}}
+@keyframes uva-spin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+@keyframes van-appear{0%{opacity:0;transform:translateY(-4px)}100%{opacity:1;transform:translateY(0)}}
+.uva-btn{background:linear-gradient(135deg,#7c4dff,#9d00ff);border:none;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;transition:box-shadow .3s;}
+.uva-btn:hover{box-shadow:0 0 15px #9d00ff;}
+.uva-emoji{font-size:18px;transition:transform .1s;display:block;line-height:1;}
+.uva-btn.spinning .uva-emoji{animation:uva-spin .8s ease-in-out infinite;}
+.uva-label{font-size:6px;letter-spacing:.15em;color:rgba(255,255,255,.7);font-family:'Courier New',monospace;font-weight:700;display:block;line-height:1;}
+.uva-btn.spinning .uva-label{animation:van-appear .4s ease forwards;}
+.file-input-hidden{display:none;}
+.attach-btn{background:none;border:none;cursor:pointer;font-size:18px;opacity:.6;transition:opacity .3s;padding:4px;}
+.attach-btn:hover{opacity:1;}
+.hero-name{font-family:'Orbitron', sans-serif;line-height:1.1;margin-bottom:15px;z-index:20;}
+.hn-baxto{display:block;font-size:clamp(32px, 10vw, 52px);font-weight:700;color:#fff;text-shadow:0 0 10px var(--c1);letter-spacing:4px;text-transform:uppercase;}
+.hn-tattoo{display:block;font-size:clamp(20px, 6vw, 30px);color:var(--c1);font-weight:400;letter-spacing:12px;margin-top:5px;text-transform:uppercase;}
+.hero-sub{font-size:13px;color:#fff;text-shadow:0 0 10px #ffd700;letter-spacing:.25em;font-weight:600;margin-bottom:4px;z-index:20;}
+.hero-phrase{font-size:14px;color:var(--c1);letter-spacing:.1em;min-height:20px;text-shadow:0 0 12px var(--c1);margin-bottom:32px;z-index:20;}
+.lily-avatar-wrap{position:relative;width:180px;height:240px;margin:10px auto 30px;cursor:pointer;display:flex;flex-direction:column;align-items:center;z-index:25;}
+.lily-avatar-img{width:160px;height:200px;object-fit:cover;object-position:top;border-radius:50% 50% 40% 40%;border:2px solid rgba(124,77,255,.6);position:relative;z-index:3;filter:drop-shadow(0 0 15px rgba(124,77,255,.7));animation:lily-breathing 4s ease-in-out infinite;}
+@keyframes lily-breathing {0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.03) translateY(-5px); }}
+.lily-av-name{display:block;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:.3em;color:#bf94ff;text-shadow:0 0 12px rgba(124,77,255,.8);margin-top:10px;}
+.info-section {width:100%;max-width:340px;margin:0 auto 30px;z-index:20;}
+.info-card {background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:12px;cursor:pointer;transition:all 0.3s;display:flex;justify-content:space-between;align-items:center;}
+.info-card:hover {background:rgba(0,229,255,0.05);border-color:var(--c1);}
+.info-card-text h3 {font-size:14px;color:var(--c5);letter-spacing:1px;margin-bottom:4px;}
+.info-card-text p {font-size:11px;color:var(--muted);}
+.info-arrow {color:var(--c1);font-size:18px;}
+.social-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;width:100%;max-width:340px;margin:0 auto 32px;z-index:20;}
+.s-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:15px 10px;gap:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:all .3s;cursor:pointer;}
+.s-card svg{width:26px;height:26px;}
+.s-card span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+.gal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;max-width:600px;margin:0 auto;}
+.gal-item{display:flex;flex-direction:column;border-radius:10px;overflow:hidden;border:1px solid rgba(0,229,255,.15);background:rgba(0,0,0,0.3);}
+.gal-card{position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;}
+.gal-card img{width:100%;height:100%;object-fit:cover;}
+.gal-label{font-size:11px;letter-spacing:.05em;color:#a0e8ff;padding:10px;background:rgba(0,5,15,.9);border-top:1px solid rgba(0,229,255,.1);line-height:1.4;min-height:55px;}
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{width:100%;max-width:600px;max-height:90vh;background:rgba(0,8,16,.98);border:1px solid var(--border);border-radius:25px 25px 0 0;overflow:hidden;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s;}
+.modal-overlay.open .modal-box{transform:translateY(0);}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:.2em;color:var(--c5);}
+.modal-close{background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;}
+.modal-body{padding:25px;overflow-y:auto;flex:1;font-size:14px;line-height:1.8;color:#c8d8e0;}
+#chat-msgs{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:12px;}
+.cmsg{display:flex;gap:10px;animation:fadeup .3s ease;}
+.cmsg.user{flex-direction:row-reverse;}
+.cav{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Bebas Neue',cursive;flex-shrink:0;border:1px solid;}
+.cbub{max-width:80%;padding:10px 15px;font-size:14px;border-radius:12px;}
+.cmsg.user .cbub{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2);}
+.cmsg.lily .cbub{background:rgba(124,77,255,.05);border:1px solid rgba(124,77,255,.2);}
+.chat-inp-wrap{padding:15px;border-top:1px solid var(--border);}
+.chat-inp-box{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border-radius:15px;padding:5px 15px;border:1px solid rgba(124,77,255,0.3);}
+.chat-inp-box textarea{flex:1;background:none;border:none;outline:none;color:#fff;padding:10px 0;resize:none;}
+.csend{background:var(--c2);border:none;width:35px;height:35px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+@media (max-width:480px){.social-grid{grid-template-columns:repeat(2,1fr);}.s-card:last-child{grid-column:span 2;}.gal-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<canvas id="neural"></canvas><canvas id="particles"></canvas><canvas id="energy"></canvas>
+<div id="main">
+ <section id="hero">
+ <div class="logo-container" onclick="openChat()" style="cursor:pointer;">
+ <div class="logo-hex"></div>
+ <div class="logo-hex-inner"><img src="https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1762409915252.jpeg"></div>
+ </div>
+ <div class="hero-name"><span class="hn-baxto">BAXTO STYLE</span><span class="hn-tattoo">TATTOO</span></div>
+ <div class="hero-sub">8 AÑOS DE EXPERIENCIA</div>
+ <div style="font-size:10px;letter-spacing:.3em;color:rgba(160,200,255,.7);text-transform:uppercase;margin-bottom:15px;">Playa del Carmen · Quintana Roo</div>
+ <div class="hero-phrase" id="phrase"></div>
+ <div class="lily-avatar-wrap" onclick="openChat()">
+ <img src="https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/avatar-lily.png" class="lily-avatar-img">
+ <span class="lily-av-name">BRA GT</span>
+ <span style="font-size:10px;letter-spacing:.15em;color:rgba(191,148,255,.6);">⚜️ Asistente IA · Toca para chatear</span>
+ </div>
+ <div class="info-section">
+ <div class="info-card" onclick="openInfo('cuidados')"><div class="info-card-text"><h3>Cuidados Post-Tatuaje</h3><p>Guía completa de sanación</p></div><div class="info-arrow">›</div></div>
+ <div class="info-card" onclick="openInfo('precios')"><div class="info-card-text"><h3>Precios y Promociones</h3><p>10% OFF reservando con BRA GT</p></div><div class="info-arrow">›</div></div>
+ <div class="info-card" onclick="openInfo('politicas')"><div class="info-card-text"><h3>Políticas y Pagos</h3><p>Ubicación y formas de pago</p></div><div class="info-arrow">›</div></div>
+ </div>
+ <div class="social-grid">
+ <a class="s-card" id="waBtn" href="https://wa.me/5219842562365?text=Hola%20Baxto!%20Quiero%20cotizar%20un%20dise%C3%B1o." target="_blank" style="color:#25D366;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><span>WhatsApp</span></a>
+ <a class="s-card" href="https://instagram.com/baxto_style" target="_blank" style="color:#E1306C;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.947C23.727 2.69 21.31.272 16.948.072 15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg><span>Instagram</span></a>
+ <a class="s-card" href="https://facebook.com/baxto.style.tattoo" target="_blank" style="color:#1877F2;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg><span>Facebook</span></a>
+ </div>
+ <div id="gallery"><h2 class="section-title" style="text-align:center;font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:.2em;color:var(--c5);margin:40px 0 20px;">PORTAFOLIO REAL</h2><div class="gal-grid" id="galTarget"></div></div>
+ </section>
+</div>
+<div class="modal-overlay" id="galModal"><div class="modal-box"><div class="modal-head"><span class="modal-title">DETALLES</span><button class="modal-close" onclick="closeModal('galModal')">&times;</button></div><div class="modal-body" id="galModalBody" style="padding:0;"></div></div></div>
+<div class="modal-overlay" id="infoModal"><div class="modal-box"><div class="modal-head"><span class="modal-title" id="infoTitle">INFO</span><button class="modal-close" onclick="closeModal('infoModal')">&times;</button></div><div class="modal-body" id="infoBody"></div></div></div>
+<div class="modal-overlay" id="chatModal"><div class="modal-box" style="height:80vh;"><div class="modal-head"><div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;background:var(--c4);border-radius:50%;"></div><span class="modal-title">BRA GT · ONLINE</span></div><button class="modal-close" onclick="closeChat()">&times;</button></div><div id="chat-msgs"></div><div class="chat-inp-wrap"><div class="chat-inp-box"><textarea id="chatInput" placeholder="Escribe un mensaje..." rows="1"></textarea><input type="file" id="imageInput" class="file-input-hidden" accept="image/*" onchange="handleImageUpload(event)">
+<button class="attach-btn" onclick="document.getElementById('imageInput').click()" title="Enviar foto de referencia">📎</button>
+<button id="sendBtn" onclick="sendMessage()" style="background:none;border:2px solid #00ff41;color:#00ff41;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px #00ff41;transition:all .2s;flex-shrink:0;">➤</button></div></div></div></div>
+
+<!-- VAN INDICATOR -->
+<div id="van-indicator" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:9999;flex-direction:column;align-items:center;gap:6px;">
+  <div style="position:relative;width:64px;height:64px;">
+    <svg width="64" height="64" style="position:absolute;top:0;left:0;animation:van-spin 1.2s linear infinite;">
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#00ff41" stroke-width="3" stroke-dasharray="100 60" opacity="0.9"/>
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#9d00ff" stroke-width="1.5" stroke-dasharray="40 120" opacity="0.6"/>
+    </svg>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6em;">🍇</div>
+  </div>
+  <div id="van-label" style="color:#00ff41;font-size:.7em;letter-spacing:.15em;text-shadow:0 0 8px #00ff41;">VAN¹ PROCESANDO</div>
+</div>
+<style>
+@keyframes van-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+#sendBtn:hover{background:#00ff41!important;color:#000!important;}
+</style>
+
+<script>
+const IMAGES = [
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_154348790.jpg', label: 'Neo Tradicional · Color Vibrante · Aguja 7RL' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_161221693.jpg', label: 'Lettering · Script Fluido · Trazo Limpio' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_161812794.jpg', label: 'Custom Design · Alma Artística' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_162704690.jpg', label: 'Realismo · Sombra y Textura' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1773541647082.jpeg', label: 'Dark Art Fusion · Cyberpunk Soul' }
+];
+const INFO_CONTENT = {
+ cuidados: { title: 'CUIDADOS POST-TATUAJE', body: '<p>1. Mantén el parche por 24h.</p><p>2. Lava con jabón neutro.</p><p>3. Crema 3 veces al día.</p><p>4. NO sol ni albercas por 15 días.</p>' },
+ precios: { title: 'PRECIOS Y PROMOS', body: '<p>• Mínimo: $1,200 MXN</p><p>• Sesión: $4,500 MXN</p><p><strong style="color:var(--c4)">PROMO: 10% OFF</strong> reservando con BRA GT.</p>' },
+ politicas: { title: 'POLÍTICAS Y PAGOS', body: '<p>• Playa del Carmen, Centro.</p><p>• Depósito del 35% para cita.</p><p>• Efectivo, Transferencia, Tarjeta.</p>' }
+};
+const PHRASES = ["LA PIEL ES EL LIENZO, EL ARTE ES ETERNO.", "PRECISIÓN MECÁNICA, ALMA ARTÍSTICA.", "TU VISIÓN, MI TINTA.", "BIENVENIDO AL FUTURO DEL TATUAJE."];
+// 🔧 MEMORIA PERSISTENTE - Phone ID único por sesión de navegador
+function getPhoneId() {
+ let phone = localStorage.getItem('bra_gt_phone');
+ if (!phone) {
+ phone = 'web_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+ localStorage.setItem('bra_gt_phone', phone);
+ }
+ return phone;
+}
+// 🔧 HISTORIAL LOCAL - Para mantener contexto visual en el chat
+let chatHistory = [];
+let pendingImageUrl = null;
+
+async function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const previewUrl = URL.createObjectURL(file);
+  const formId = 'cotiza-form-' + Date.now();
+  const container = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'cmsg lily';
+  div.id = formId;
+  div.innerHTML = \`
+    <div class="cav">GT</div>
+    <div class="cbub" style="padding:14px;min-width:240px">
+      <div style="font-size:.85rem;color:#00f5ff;letter-spacing:.1em;margin-bottom:10px">📋 COMPLETA TU COTIZACIÓN</div>
+      <img src="\${previewUrl}" style="width:100%;border-radius:10px;margin-bottom:10px;max-height:180px;object-fit:cover">
+      <input id="cf-nombre" placeholder="Tu nombre 👤" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(0,245,255,.2);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;margin-bottom:6px;box-sizing:border-box">
+      <input id="cf-cm" placeholder="Centímetros aproximados 📏" type="number" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(0,245,255,.2);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;margin-bottom:6px;box-sizing:border-box">
+      <input id="cf-zona" placeholder="Zona del cuerpo 📍" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(0,245,255,.2);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;margin-bottom:10px;box-sizing:border-box">
+      <button onclick="enviarCotizacion('\${formId}')" style="width:100%;background:linear-gradient(135deg,#7c4dff,#9d00ff);border:none;padding:10px;border-radius:10px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.1em">Analizar con BRA 🍇</button>
+    </div>\`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  window._pendingFile = file;
+  event.target.value = '';
+}
+
+async function enviarCotizacion(formId) {
+  const nombre = document.getElementById('cf-nombre')?.value.trim() || '';
+  const cm = document.getElementById('cf-cm')?.value.trim() || '';
+  const zona = document.getElementById('cf-zona')?.value.trim() || '';
+  const file = window._pendingFile;
+  if (!file) return;
+  if (!nombre) { document.getElementById('cf-nombre').style.border='1px solid #ff4444'; return; }
+  const container = document.getElementById('chat-msgs');
+  const formDiv = document.getElementById(formId);
+  if (formDiv) formDiv.remove();
+  addMessage('user', \`📎 \${nombre} · \${cm}cm · \${zona}\`);
+  const van = document.getElementById('van-indicator');
+  van.style.display = 'flex';
+  document.getElementById('van-label').textContent = 'VAN¹ ANALIZANDO';
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    const uploadRes = await fetch('/api/upload-image', { method: 'POST', body: formData });
+    const uploadData = await uploadRes.json();
+    if (!uploadData.url) throw new Error('Upload falló');
+    const res = await fetch('/api/analyze-image', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({image_url: uploadData.url})
+    });
+    const data = await res.json();
+    van.style.display = 'none';
+    if (data.ok && data.analysis) {
+      const a = data.analysis;
+      const waText = encodeURIComponent(\`Hola Baxto! Soy \${nombre}. Quiero cotizar: \${a.descripcion}, estilo \${a.estilo}, ~\${cm||a.tamano_sugerido_cm}cm en \${zona||a.zona_sugerida} 🖤\`);
+      const waBtn = document.getElementById('waBtn');
+      if (waBtn) waBtn.href = \`https://wa.me/5219842562365?text=\${waText}\`;
+      const checks = [
+        \`<span style="color:#00ff88">✅</span> Nombre: <b>\${nombre}</b>\`,
+        \`<span style="color:#7c4dff">✅</span> Tamaño: <b>\${cm||a.tamano_sugerido_cm}cm</b>\`,
+        \`<span style="color:#00f5ff">✅</span> Zona: <b>\${zona||a.zona_sugerida}</b>\`,
+        \`<span style="color:#ffd700">✅</span> Diseño: <b>\${a.descripcion}</b>\`
+      ].join('<br>');
+      const resDiv = document.createElement('div');
+      resDiv.className = 'cmsg lily';
+      resDiv.innerHTML = \`<div class="cav">GT</div><div class="cbub" style="padding:14px">
+        <div style="font-size:.8rem;color:#9d00ff;letter-spacing:.1em;margin-bottom:8px">🍇 ANÁLISIS COMPLETADO</div>
+        <div style="font-size:.88rem;line-height:1.8;margin-bottom:10px">\${checks}</div>
+        <div style="font-size:.8rem;color:#3a5a7a;margin-bottom:4px">🎨 Estilo: \${a.estilo} · ⚡ Complejidad: \${a.complejidad}/10</div>
+        <div style="font-size:.8rem;color:#7c4dff;margin-top:6px">💡 \${a.sugerencia_baxto}</div>
+        <div style="margin-top:12px;padding:8px;background:rgba(157,0,255,.1);border-radius:8px;font-size:.82rem;color:#e0f0ff;text-align:center">🦾 2do NIVEL desbloqueado<br><span style="font-size:.75rem;color:#3a5a7a">Baxto tiene todo para cotizarte</span></div>
+        <a href="https://wa.me/5219842562365?text=\${waText}" target="_blank" style="display:block;margin-top:10px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:10px;padding:10px;text-align:center;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;letter-spacing:.05em">💬 Confirmar con Baxto · WhatsApp</a>
+      </div>\`;
+      container.appendChild(resDiv);
+      container.scrollTop = container.scrollHeight;
+      await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          message: \`[Contexto: Cliente \${nombre} tiene imagen analizada. Diseño: \${a.descripcion}, estilo \${a.estilo}, \${cm||a.tamano_sugerido_cm}cm en \${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]\`,
+          phone: getPhoneId(),
+          customer_id: getPhoneId()
+        })
+      });
+    } else {
+      addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
+    }
+  } catch(e) {
+    van.style.display = 'none';
+    addMessage('bot', '❌ Error: ' + e.message);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => { 
+ initNeural(); 
+ initParticles(); 
+ initEnergy(); 
+ renderGallery(); 
+ startPhraseCycle(); 
+ const tx = document.getElementById('chatInput'); 
+ tx.addEventListener('input', function() { 
+ this.style.height = 'auto'; 
+ this.style.height = (this.scrollHeight) + 'px'; 
+ }); 
+ tx.addEventListener('keypress', function(e) { 
+ if(e.key === 'Enter' && !e.shiftKey) { 
+ e.preventDefault(); 
+ sendMessage(); 
+ } 
+ }); 
+});
+function renderGallery() { 
+ const container = document.getElementById('galTarget'); 
+ IMAGES.forEach((img, i) => { 
+ const div = document.createElement('div'); 
+ div.className = 'gal-item'; 
+ div.innerHTML = \`<div class="gal-card" onclick="openGallery(\${i})"><img src="\${img.url}" loading="lazy"></div><div class="gal-label">\${img.label}</div>\`; 
+ container.appendChild(div); 
+ }); 
+}
+function startPhraseCycle() { 
+ const el = document.getElementById('phrase'); 
+ let idx = 0; 
+ setInterval(() => { 
+ el.style.opacity = 0; 
+ setTimeout(() => { 
+ el.textContent = PHRASES[idx]; 
+ el.style.opacity = 1; 
+ idx = (idx + 1) % PHRASES.length; 
+ }, 500); 
+ }, 5000); 
+ el.textContent = PHRASES[0]; 
+ el.style.transition = 'opacity 0.5s'; 
+}
+function openModal(id) { 
+ document.getElementById(id).classList.add('open'); 
+ document.body.style.overflow = 'hidden'; 
+}
+function closeModal(id) { 
+ document.getElementById(id).classList.remove('open'); 
+ document.body.style.overflow = ''; 
+}
+function openGallery(idx) { 
+ const body = document.getElementById('galModalBody'); 
+ body.innerHTML = \`<img src="\${IMAGES[idx].url}" style="width:100%;"><div style="padding:20px;color:var(--c1);">\${IMAGES[idx].label}</div>\`; 
+ openModal('galModal'); 
+}
+function openInfo(key) { 
+ const c = INFO_CONTENT[key]; 
+ document.getElementById('infoTitle').textContent = c.title; 
+ document.getElementById('infoBody').innerHTML = c.body; 
+ openModal('infoModal'); 
+}
+// 🔧 CHAT CON MEMORIA
+function openChat() { 
+ openModal('chatModal'); 
+ if(document.getElementById('chat-msgs').innerHTML === '') {
+ addMessage('lily', 'Hola, soy BRA GT. ¿En qué puedo ayudarte hoy?');
+ }
+}
+// 🔧 CERRAR CHAT Y LIMPIAR (opcional - para nuevas conversaciones)
+function closeChat() {
+ closeModal('chatModal');
+ // Descomenta la siguiente línea si quieres resetear el chat al cerrar:
+ // setTimeout(() => { document.getElementById('chat-msgs').innerHTML = ''; }, 300);
+}
+function addMessage(role, text) { 
+ const container = document.getElementById('chat-msgs'); 
+ const div = document.createElement('div'); 
+ div.className = \`cmsg \${role}\`; 
+ // Convertir links wa.me en botón verde neón
+ let renderText = text.replace(
+ /(👉\\s*)?(https:\\/\\/wa\\.me\\/\\S+)/g,
+ '<a href="$2" target="_blank" style="display:inline-block;margin-top:10px;padding:10px 18px;background:#00ff88;color:#000;font-weight:bold;border-radius:8px;text-decoration:none;box-shadow:0 0 12px #00ff88;">💬 Confirmar con Baxto</a>'
+ );
+ div.innerHTML = \`<div class="cav">\${role==='user'?'YO':'GT'}</div><div class="cbub">\${renderText}</div>\`; 
+ container.appendChild(div); 
+ container.scrollTop = container.scrollHeight; 
+ // Guardar en historial local
+ chatHistory.push({role, text, time: Date.now()});
+}
+// 🎨 MOCKUP — cliente pide ver cómo quedaría
+async function generarMockup(descripcion, zona, estilo) {
+  const van = document.getElementById('van-indicator');
+  van.style.display = 'flex';
+  document.getElementById('van-label').textContent = 'VAN² CREANDO';
+  try {
+    const res = await fetch('/api/generate-mockup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ descripcion, zona: zona||'brazo', estilo: estilo||'blackwork', tamano_cm: 10 })
+    });
+    const data = await res.json();
+    van.style.display = 'none';
+    if (data.ok && data.image_url) {
+      const nombre = findNameInHistory() || 'Cliente';
+      const waText = encodeURIComponent(\`Hola Baxto! Soy \${nombre}. Me generé un mockup de \${descripcion} en \${zona||'brazo'}. Quiero ver cómo quedaría el diseño final contigo 🖤\`);
+      const container = document.getElementById('chat-msgs');
+      const div = document.createElement('div');
+      div.className = 'cmsg lily';
+      div.innerHTML = \`<div class="cav">GT</div><div class="cbub">
+        <div style="font-size:.8rem;color:#9d00ff;margin-bottom:8px">🎨 MOCKUP ORIENTATIVO</div>
+        <img src="\${data.image_url}" style="width:100%;border-radius:8px;border:1px solid #7c4dff" loading="lazy"/>
+        <div style="font-size:.75rem;color:#3a5a7a;margin-top:6px">Vista previa generada por IA. El diseño final lo define Baxto.</div>
+        <div style="font-size:.78rem;color:#9d00ff;margin-top:8px">¿Tu idea es diferente o quieres modificar? Baxto te dará tu boceto final — cuéntale más a fondo 🖤</div>
+        <a href="https://wa.me/5219842562365?text=\${waText}" target="_blank" style="display:block;margin-top:10px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:10px;padding:10px;text-align:center;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;letter-spacing:.05em">💬 Hablar con Baxto · WhatsApp</a>
+      </div>\`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+  } catch(e) {
+    document.getElementById('van-indicator').style.display = 'none';
+    addMessage('lily', 'No pude generar el mockup. Escríbele directo a Baxto 🖤');
+  }
+}
+
+// 🔧 FUNCIÓN CORREGIDA CON MEMORIA PERSISTENTE
+// 🔥 MEMORIA LOCAL: Extraer nombre del historial
+function findNameInHistory() {
+ const patterns = [
+ /me llamo ([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/i,
+ /soy ([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)(?:\\s|$|[,.])/i,
+ /mi nombre es ([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/i,
+ /nombre:?\\s*([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/i
+ ];
+ for (let i = chatHistory.length - 1; i >= 0; i--) {
+ if (chatHistory[i].role === 'user') {
+ const text = chatHistory[i].text;
+ for (const pattern of patterns) {
+ const match = text.match(pattern);
+ if (match) return match[1].trim();
+ }
+ }
+ }
+ return null;
+}
+async function sendMessage() {
+  const inputCheck = document.getElementById('chatInput');
+  const textCheck = inputCheck ? inputCheck.value.trim() : '';
+  // Detectar si cliente pide mockup
+  if (/muéstrame|muestrame|cómo quedaría|como quedaria|preview|mockup|ver el diseño|ver diseño/i.test(textCheck)) {
+    inputCheck.value = '';
+    const nombre = findNameInHistory() || 'Cliente';
+    // Buscar diseño y zona del historial
+    const hist = chatHistory.map(m => m.text).join(' ');
+    const dis = (hist.match(/rosa|lobo|mariposa|flor|calavera|letra|nombre|frase|aguila|dragon|tribal|mandala/i)||[])[0]||'tatuaje';
+    const zon = (hist.match(/brazo|mano|pierna|espalda|pecho|cuello|tobillo|antebrazo/i)||[])[0]||'brazo';
+    addMessage('user', textCheck);
+    await generarMockup(dis, zon, 'blackwork');
+    return;
+  }
+ const input = document.getElementById('chatInput');
+ const text = input.value.trim();
+ if (!text) return;
+ input.value = '';
+ input.style.height = 'auto';
+ addMessage('user', text);
+ // Indicador de "escribiendo..."
+ const typingId = 'typing-' + Date.now();
+ const msgContainer = document.getElementById('chat-msgs');
+ const div = document.createElement('div');
+ div.className = 'cmsg lily';
+ div.id = typingId;
+ div.innerHTML = \`<div class="cav">GT</div><div class="cbub">...</div>\`;
+ msgContainer.appendChild(div);
+ msgContainer.scrollTop = msgContainer.scrollHeight;
+ // 🔧 USAR PHONE ID PERSISTENTE
+ const phoneId = getPhoneId();
+ // 🔧 PREPARAR HISTORIAL PARA EL WORKER (últimos 10 mensajes)
+ const historyForWorker = chatHistory.slice(-10).map(h => ({
+ role: h.role === 'user' ? 'user' : 'assistant',
+ content: h.text
+ }));
+ try {
+ // 🔥 MEMORY INJECTION: Prepend contexto crítico al mensaje
+ let enhancedMessage = text;
+ const lastName = findNameInHistory();
+ const hasContext = chatHistory.length > 2;
+ // Si es pregunta sobre identidad y sabemos el nombre, responder local
+ if ((text.toLowerCase().includes('como me llamo') || 
+ text.toLowerCase().includes('cómo me llamo') ||
+ text.toLowerCase().includes('mi nombre')) && lastName) {
+ document.getElementById(typingId).remove();
+ addMessage('lily', \`Te llamas \${lastName}. ¿En qué más puedo ayudarte?\`);
+ return;
+ }
+ // Inyectar memoria en el mensaje para el LLM
+ if (lastName && chatHistory.length > 0) {
+ enhancedMessage = \`[Contexto: Cliente se llama \${lastName}. Historial previo disponible.] \${text}\`;
+ }
+ const res = await fetch('/api/chat', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ 
+ message: enhancedMessage, 
+ history: historyForWorker,
+ phone: phoneId,
+ customer_id: phoneId
+ })
+ });
+ const data = await res.json();
+ document.getElementById(typingId).remove();
+ // 🔧 EXTRACCIÓN ROBUSTA DE RESPUESTA
+ let respuesta = "Error en respuesta";
+ if (data.reply) {
+ respuesta = data.reply;
+ } else if (data.response) {
+ respuesta = data.response;
+ } else if (data.text) {
+ respuesta = data.text;
+ } else if (data.message) {
+ respuesta = data.message;
+ } else if (data.content) {
+ respuesta = data.content;
+ } else if (data.choices && data.choices[0] && data.choices[0].message) {
+ respuesta = data.choices[0].message.content;
+ } else if (data.result) {
+ respuesta = data.result;
+ } else if (typeof data === 'string') {
+ respuesta = data;
+ }
+ addMessage('lily', respuesta);
+ } catch (e) {
+ document.getElementById(typingId).remove();
+ addMessage('lily', 'Error de conexión. Intenta de nuevo.');
+ console.error('Chat error:', e);
+ }
+}
+function initNeural() { 
+ const canvas = document.getElementById('neural'); 
+ const ctx = canvas.getContext('2d'); 
+ let w, h, nodes = []; 
+ function resize() { 
+ w = canvas.width = window.innerWidth; 
+ h = canvas.height = window.innerHeight; 
+ } 
+ window.addEventListener('resize', resize); 
+ resize(); 
+ for(let i=0; i<40; i++) nodes.push({
+ x:Math.random()*w, 
+ y:Math.random()*h, 
+ vx:Math.random()-0.5, 
+ vy:Math.random()-0.5
+ }); 
+ function draw() { 
+ ctx.clearRect(0,0,w,h); 
+ ctx.strokeStyle = 'rgba(124,77,255,0.2)'; 
+ ctx.fillStyle = 'rgba(124,77,255,0.5)'; 
+ nodes.forEach((n,i) => { 
+ n.x += n.vx; 
+ n.y += n.vy; 
+ if(n.x<0||n.x>w) n.vx*=-1; 
+ if(n.y<0||n.y>h) n.vy*=-1; 
+ ctx.beginPath(); 
+ ctx.arc(n.x,n.y,2,0,Math.PI*2); 
+ ctx.fill(); 
+ for(let j=i+1; j<nodes.length; j++) { 
+ const n2 = nodes[j]; 
+ const dist = Math.hypot(n.x-n2.x, n.y-n2.y); 
+ if(dist < 150) { 
+ ctx.lineWidth = 1 - dist/150; 
+ ctx.beginPath(); 
+ ctx.moveTo(n.x,n.y); 
+ ctx.lineTo(n2.x,n2.y); 
+ ctx.stroke(); 
+ } 
+ } 
+ }); 
+ requestAnimationFrame(draw); 
+ } 
+ draw(); 
+}
+function initParticles() { 
+ const canvas = document.getElementById('particles'); 
+ const ctx = canvas.getContext('2d'); 
+ let w, h, parts = []; 
+ function resize() { 
+ w = canvas.width = window.innerWidth; 
+ h = canvas.height = window.innerHeight; 
+ } 
+ window.addEventListener('resize', resize); 
+ resize(); 
+ for(let i=0; i<50; i++) parts.push({
+ x:Math.random()*w, 
+ y:Math.random()*h, 
+ s:Math.random()*2, 
+ o:Math.random(), 
+ v:Math.random()*0.5+0.2
+ }); 
+ function draw() { 
+ ctx.clearRect(0,0,w,h); 
+ parts.forEach(p => { 
+ p.y -= p.v; 
+ if(p.y<0) p.y=h; 
+ ctx.fillStyle = \`rgba(0,229,255,\${p.o})\`; 
+ ctx.fillRect(p.x,p.y,p.s,p.s); 
+ }); 
+ requestAnimationFrame(draw); 
+ } 
+ draw(); 
+}
+function initEnergy() { 
+ const canvas = document.getElementById('energy'); 
+ const ctx = canvas.getContext('2d'); 
+ let w, h; 
+ function resize() { 
+ w = canvas.width = window.innerWidth; 
+ h = canvas.height = window.innerHeight; 
+ } 
+ window.addEventListener('resize', resize); 
+ resize(); 
+ function draw(t) { 
+ ctx.clearRect(0,0,w,h); 
+ ctx.beginPath(); 
+ ctx.strokeStyle = 'rgba(255,23,68,0.05)'; 
+ for(let i=0; i<w; i+=10) { 
+ const y = Math.sin(i*0.01 + t*0.001) * 20 + h*0.8; 
+ ctx.lineTo(i,y); 
+ } 
+ ctx.stroke(); 
+ requestAnimationFrame(draw); 
+ } 
+ draw(0); 
+}
+</script>
+</body>
+</html>
+`;
 }
 
 export default {

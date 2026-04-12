@@ -109,7 +109,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
 <div class="modal-overlay" id="infoModal"><div class="modal-box"><div class="modal-head"><span class="modal-title" id="infoTitle">INFO</span><button class="modal-close" onclick="closeModal('infoModal')">&times;</button></div><div class="modal-body" id="infoBody"></div></div></div>
 <div class="modal-overlay" id="chatModal"><div class="modal-box" style="height:80vh;"><div class="modal-head"><div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;background:var(--c4);border-radius:50%;"></div><span class="modal-title">BRA GT · ONLINE</span></div><button class="modal-close" onclick="closeChat()">&times;</button></div><div id="chat-msgs"></div><div class="chat-inp-wrap"><div class="chat-inp-box"><textarea id="chatInput" placeholder="Escribe un mensaje..." rows="1"></textarea><input type="file" id="imageInput" class="file-input-hidden" accept="image/*" onchange="handleImageUpload(event)">
 <button class="attach-btn" onclick="document.getElementById('imageInput').click()" title="Enviar foto de referencia">📎</button>
-<button class="uva-btn" id="uvaBtn" onclick="sendMessage()"><span class="uva-emoji">🍇</span><span class="uva-label">VAN¹</span></button></div></div></div></div>
+<button id="sendBtn" onclick="sendMessage()" style="background:none;border:2px solid #00ff41;color:#00ff41;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px #00ff41;transition:all .2s;flex-shrink:0;">➤</button></div></div></div></div>
+
+<!-- VAN INDICATOR -->
+<div id="van-indicator" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:9999;flex-direction:column;align-items:center;gap:6px;">
+  <div style="position:relative;width:64px;height:64px;">
+    <svg width="64" height="64" style="position:absolute;top:0;left:0;animation:van-spin 1.2s linear infinite;">
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#00ff41" stroke-width="3" stroke-dasharray="100 60" opacity="0.9"/>
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#9d00ff" stroke-width="1.5" stroke-dasharray="40 120" opacity="0.6"/>
+    </svg>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6em;">🍇</div>
+  </div>
+  <div id="van-label" style="color:#00ff41;font-size:.7em;letter-spacing:.15em;text-shadow:0 0 8px #00ff41;">VAN¹ PROCESANDO</div>
+</div>
+<style>
+@keyframes van-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+#sendBtn:hover{background:#00ff41!important;color:#000!important;}
+</style>
+
 <script>
 const IMAGES = [
  { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
@@ -174,8 +191,9 @@ async function enviarCotizacion(formId) {
   const formDiv = document.getElementById(formId);
   if (formDiv) formDiv.remove();
   addMessage('user', `📎 ${nombre} · ${cm}cm · ${zona}`);
-  const btn = document.getElementById('uvaBtn');
-  btn.classList.add('spinning');
+  const van = document.getElementById('van-indicator');
+  van.style.display = 'flex';
+  document.getElementById('van-label').textContent = 'VAN¹ ANALIZANDO';
   try {
     const formData = new FormData();
     formData.append('image', file);
@@ -188,7 +206,7 @@ async function enviarCotizacion(formId) {
       body: JSON.stringify({image_url: uploadData.url})
     });
     const data = await res.json();
-    btn.classList.remove('spinning');
+    van.style.display = 'none';
     if (data.ok && data.analysis) {
       const a = data.analysis;
       const waText = encodeURIComponent(`Hola Baxto! Soy ${nombre}. Quiero cotizar: ${a.descripcion}, estilo ${a.estilo}, ~${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida} 🖤`);
@@ -208,6 +226,7 @@ async function enviarCotizacion(formId) {
         <div style="font-size:.8rem;color:#3a5a7a;margin-bottom:4px">🎨 Estilo: ${a.estilo} · ⚡ Complejidad: ${a.complejidad}/10</div>
         <div style="font-size:.8rem;color:#7c4dff;margin-top:6px">💡 ${a.sugerencia_baxto}</div>
         <div style="margin-top:12px;padding:8px;background:rgba(157,0,255,.1);border-radius:8px;font-size:.82rem;color:#e0f0ff;text-align:center">🦾 2do NIVEL desbloqueado<br><span style="font-size:.75rem;color:#3a5a7a">Baxto tiene todo para cotizarte</span></div>
+        <a href="https://wa.me/5219842562365?text=${waText}" target="_blank" style="display:block;margin-top:10px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:10px;padding:10px;text-align:center;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;letter-spacing:.05em">💬 Confirmar con Baxto · WhatsApp</a>
       </div>`;
       container.appendChild(resDiv);
       container.scrollTop = container.scrollHeight;
@@ -224,7 +243,7 @@ async function enviarCotizacion(formId) {
       addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
     }
   } catch(e) {
-    btn.classList.remove('spinning');
+    van.style.display = 'none';
     addMessage('bot', '❌ Error: ' + e.message);
   }
 }
@@ -318,7 +337,9 @@ function addMessage(role, text) {
 }
 // 🎨 MOCKUP — cliente pide ver cómo quedaría
 async function generarMockup(descripcion, zona, estilo) {
-  addMessage('lily', '🎨 Generando mockup de tu tatuaje...');
+  const van = document.getElementById('van-indicator');
+  van.style.display = 'flex';
+  document.getElementById('van-label').textContent = 'VAN² CREANDO';
   try {
     const res = await fetch('/api/generate-mockup', {
       method: 'POST',
@@ -326,7 +347,10 @@ async function generarMockup(descripcion, zona, estilo) {
       body: JSON.stringify({ descripcion, zona: zona||'brazo', estilo: estilo||'blackwork', tamano_cm: 10 })
     });
     const data = await res.json();
+    van.style.display = 'none';
     if (data.ok && data.image_url) {
+      const nombre = findNameInHistory() || 'Cliente';
+      const waText = encodeURIComponent(`Hola Baxto! Soy ${nombre}. Me generé un mockup de ${descripcion} en ${zona||'brazo'}. Quiero ver cómo quedaría el diseño final contigo 🖤`);
       const container = document.getElementById('chat-msgs');
       const div = document.createElement('div');
       div.className = 'cmsg lily';
@@ -334,11 +358,14 @@ async function generarMockup(descripcion, zona, estilo) {
         <div style="font-size:.8rem;color:#9d00ff;margin-bottom:8px">🎨 MOCKUP ORIENTATIVO</div>
         <img src="${data.image_url}" style="width:100%;border-radius:8px;border:1px solid #7c4dff" loading="lazy"/>
         <div style="font-size:.75rem;color:#3a5a7a;margin-top:6px">Vista previa generada por IA. El diseño final lo define Baxto.</div>
+        <div style="font-size:.78rem;color:#9d00ff;margin-top:8px">¿Tu idea es diferente o quieres modificar? Baxto te dará tu boceto final — cuéntale más a fondo 🖤</div>
+        <a href="https://wa.me/5219842562365?text=${waText}" target="_blank" style="display:block;margin-top:10px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:10px;padding:10px;text-align:center;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;letter-spacing:.05em">💬 Hablar con Baxto · WhatsApp</a>
       </div>`;
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
     }
   } catch(e) {
+    document.getElementById('van-indicator').style.display = 'none';
     addMessage('lily', 'No pude generar el mockup. Escríbele directo a Baxto 🖤');
   }
 }

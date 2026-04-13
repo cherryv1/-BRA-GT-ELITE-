@@ -1320,7 +1320,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
  <section id="hero">
  <div class="logo-container" onclick="openChat()" style="cursor:pointer;">
  <div class="logo-hex"></div>
- <div class="logo-hex-inner"><img src="https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1762409915252.jpeg"></div>
+ <div class="logo-hex-inner"><img src="https://i.ibb.co/yFLQp99c/image-1762409915252.jpg"></div>
  </div>
  <div class="hero-name"><span class="hn-baxto">BAXTO STYLE</span><span class="hn-tattoo">TATTOO</span></div>
  <div class="hero-sub">8 AÑOS DE EXPERIENCIA</div>

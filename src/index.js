@@ -1376,9 +1376,9 @@ const IMAGES = [
  { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1773541647082.jpeg', label: 'Dark Art Fusion · Cyberpunk Soul' }
 ];
 const INFO_CONTENT = {
- cuidados: { title: 'CUIDADOS POST-TATUAJE', body: '<p>1. Mantén el parche por 24h.</p><p>2. Lava con jabón neutro.</p><p>3. Crema 3 veces al día.</p><p>4. NO sol ni albercas por 15 días.</p>' },
- precios: { title: 'PRECIOS Y PROMOS', body: '<p>• Mínimo: $1,200 MXN</p><p>• Sesión: $4,500 MXN</p><p><strong style="color:var(--c4)">PROMO: 10% OFF</strong> reservando con BRA GT.</p>' },
- politicas: { title: 'POLÍTICAS Y PAGOS', body: '<p>• Playa del Carmen, Centro.</p><p>• Depósito del 35% para cita.</p><p>• Efectivo, Transferencia, Tarjeta.</p>' }
+ cuidados: { title: 'CUIDADOS POST-TATUAJE', body: '<p>🧼 <strong>Día 1-2:</strong> Lavar con agua y jabón neutro, secar al aire.</p><p>💜 <strong>Día 3+:</strong> Jabón neutro + Bepanthen capa fina, 2-3 veces/día.</p><p>💧 Hidratación 24/7.</p><p>⛔ NO sol, NO rascar, NO playa/alberca.</p><p>✅ Retoque evaluado al mes.</p>' },
+ precios: { title: 'PRECIOS Y PROMOS', body: '<p>• 5-8cm simple: <strong>desde $500 MXN</strong></p><p>• 10-15cm medio: <strong>desde $1,000 MXN</strong></p><p>• Realismo/mangas: Baxto cotiza directo.</p><p>🎁 <strong>10% OFF</strong> nuevos | <strong>20% OFF</strong> 4+ tatuajes</p>' },
+ politicas: { title: 'POLÍTICAS Y PAGOS', body: '<p>📍 Villas del Sol 77723, Playa del Carmen.</p><p>💰 Efectivo y Transferencia.</p><p>📋 Anticipo 35% para cita.</p><p>⛔ NO embarazadas. Menores con permiso + padres.</p><p>🕐 Ubicación exacta 1h antes.</p>' }
 };
 const PHRASES = ["LA PIEL ES EL LIENZO, EL ARTE ES ETERNO.", "PRECISIÓN MECÁNICA, ALMA ARTÍSTICA.", "TU VISIÓN, MI TINTA.", "BIENVENIDO AL FUTURO DEL TATUAJE."];
 // 🔧 MEMORIA PERSISTENTE - Phone ID único por sesión de navegador

@@ -16,8 +16,22 @@ TIKTOK: @baxtostyletattoo
 MAPS: maps.app.goo.gl/p165HXNeh4p7GbuA8
 Responde en espanol, maximo 3 oraciones, elegante y profesional.`;
 
-async function askAI(message, imageB64 = null) {
-  // If image, use Gemini Vision
+// Convierte historial del frontend al formato OpenAI
+function buildMessages(history, message) {
+  const msgs = [{ role: 'system', content: SYSTEM }];
+  if (history && Array.isArray(history)) {
+    for (const h of history) {
+      if (h.role && h.text) {
+        msgs.push({ role: h.role === 'bot' ? 'assistant' : 'user', content: h.text });
+      }
+    }
+  }
+  msgs.push({ role: 'user', content: message });
+  return msgs;
+}
+
+async function askAI(message, imageB64 = null, history = []) {
+  // Si hay imagen, usar Gemini Vision (sin historial, es análisis puntual)
   if (imageB64) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
     const r = await fetch(url, {
@@ -38,13 +52,15 @@ async function askAI(message, imageB64 = null) {
     return d.candidates?.[0]?.content?.parts?.[0]?.text || 'No pude analizar la imagen.';
   }
 
-  // Multi-agent fallback chain
+  // Chat con historial — fallback chain
+  const messages = buildMessages(history, message);
+
   const intentos = [
     async () => {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: message }], max_tokens: 200 })
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, max_tokens: 200 })
       });
       const d = await r.json();
       if (!d.choices) throw new Error('Groq fallo');
@@ -54,7 +70,7 @@ async function askAI(message, imageB64 = null) {
       const r = await fetch('https://api.together.xyz/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}` },
-        body: JSON.stringify({ model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: message }], max_tokens: 200 })
+        body: JSON.stringify({ model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', messages, max_tokens: 200 })
       });
       const d = await r.json();
       if (!d.choices) throw new Error('Together fallo');
@@ -64,7 +80,7 @@ async function askAI(message, imageB64 = null) {
       const r = await fetch('https://api.cerebras.ai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.CEREBRAS_API_KEY}` },
-        body: JSON.stringify({ model: 'llama-3.3-70b', messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: message }], max_tokens: 200 })
+        body: JSON.stringify({ model: 'llama-3.3-70b', messages, max_tokens: 200 })
       });
       const d = await r.json();
       if (!d.choices) throw new Error('Cerebras fallo');
@@ -80,7 +96,11 @@ async function askAI(message, imageB64 = null) {
 
 app.post('/chat', async (req, res) => {
   try {
-    const respuesta = await askAI(req.body.message || 'Hola', req.body.image || null);
+    const respuesta = await askAI(
+      req.body.message || 'Hola',
+      req.body.image || null,
+      req.body.history || []
+    );
     res.json({ respuesta });
   } catch (err) {
     res.status(500).json({ error: err.message });

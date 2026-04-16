@@ -923,7 +923,6 @@ async function handleRequest(request, env) {
         const imageFile = formData.get('image');
         if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
         const arrayBuffer = await imageFile.arrayBuffer();
-      return jsonRes({ image: imgUrl, prompt });
         const mimeType = imageFile.type || 'image/jpeg';
         imageUrl = `data:${mimeType};base64,${base64Image}`;
       }

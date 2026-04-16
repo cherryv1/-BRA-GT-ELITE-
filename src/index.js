@@ -923,7 +923,7 @@ async function handleRequest(request, env) {
         const imageFile = formData.get('image');
         if (!imageFile) return jsonRes({ error: 'No se recibió imagen' }, 400);
         const arrayBuffer = await imageFile.arrayBuffer();
-        const base64Image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        const bytes = new Uint8Array(arrayBuffer); let binary = ""; for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]); const base64Image = btoa(binary);
         const mimeType = imageFile.type || 'image/jpeg';
         imageUrl = `data:${mimeType};base64,${base64Image}`;
       }

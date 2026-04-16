@@ -235,10 +235,15 @@ async function enviarCotizacion(formId) {
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           message: `[Contexto: Cliente ${nombre} tiene imagen analizada. Diseño: ${a.descripcion}, estilo ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]`,
+          history: chatHistory.slice(-10).map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.text })),
           phone: getPhoneId(),
           customer_id: getPhoneId()
         })
       });
+      const imgData = await (await fetch('/api/chat', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`[Analisis completado]`,phone:getPhoneId()})})).json();
+      if (imgData.respuesta || imgData.reply) {
+        chatHistory.push({ role: 'bot', text: imgData.respuesta||imgData.reply, time: Date.now() });
+      }
     } else {
       addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
     }

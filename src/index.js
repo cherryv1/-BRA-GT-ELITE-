@@ -1061,6 +1061,18 @@ async function handleRequest(request, env) {
     }
   }
 
+
+  if (path === '/admin/sql' && request.method === 'POST') {
+    try {
+      const { sql } = await request.json();
+      if (!sql) return jsonRes({ ok: false, error: 'sql requerido' }, 400);
+      const result = await env.DB.prepare(sql).run();
+      return jsonRes({ ok: true, result });
+    } catch(e) {
+      return jsonRes({ ok: false, error: e.message }, 500);
+    }
+  }
+
   if (path === '/admin/init-db' && request.method === 'POST') {
     const result = await initDB(env);
     return jsonRes(result);

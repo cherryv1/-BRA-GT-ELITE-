@@ -445,6 +445,10 @@ async function chatWithMemory(env, sessionId, customerId, message) {
       if (kvData.nombre) {
         systemPrompt += `\n\nEl cliente se llama ${kvData.nombre}.`;
       }
+      if (kvData.ultimoAnalisis) {
+        const ua = kvData.ultimoAnalisis;
+        systemPrompt += `\n\nIMAGEN ANALIZADA POR VAN1: Cliente subió imagen de referencia. Diseño: ${ua.descripcion}. Estilo: ${ua.estilo}. Zona: ${ua.zona}. Tamaño: ${ua.cm}cm. NO pidas esta información de nuevo.`;
+      }
     }
   } catch(e) {}
 
@@ -959,6 +963,19 @@ async function handleRequest(request, env) {
       const rawText = groqData.choices?.[0]?.message?.content || '{}';
       const clean = rawText.replace(/```json|```/g, '').trim();
       const analysis = JSON.parse(clean);
+      try {
+        const sessionId = request.headers.get('X-Session-Id') || 'anonymous';
+        const rawKV = await env.SESSIONS.get(`sess:${sessionId}`).catch(() => null);
+        const kvData = rawKV ? JSON.parse(rawKV) : { messages: [] };
+        kvData.ultimoAnalisis = {
+          descripcion: analysis.descripcion,
+          estilo: analysis.estilo,
+          zona: analysis.zona_sugerida,
+          cm: analysis.tamano_sugerido_cm,
+          timestamp: Date.now()
+        };
+        await env.SESSIONS.put(`sess:${sessionId}`, JSON.stringify(kvData), { expirationTtl: 86400 });
+      } catch(e) { console.error('KV analisis:', e); }
       return jsonRes({ ok: true, analysis, model: 'llama-4-scout-vision' });
     } catch(e) {
       return jsonRes({ error: e.message }, 500);

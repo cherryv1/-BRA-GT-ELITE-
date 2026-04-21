@@ -200,9 +200,10 @@ async function enviarCotizacion(formId) {
     const uploadRes = await fetch('/api/upload-image', { method: 'POST', body: formData });
     const uploadData = await uploadRes.json();
     if (!uploadData.url) throw new Error('Upload falló');
+    const phoneId = getPhoneId();
     const res = await fetch('/api/analyze-image', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'X-Session-Id': phoneId},
       body: JSON.stringify({image_url: uploadData.url})
     });
     const data = await res.json();

@@ -1367,14 +1367,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
  <section id="hero">
  <div class="logo-container" onclick="openChat()" style="cursor:pointer;">
  <div class="logo-hex"></div>
- <div class="logo-hex-inner"><img src="https://i.ibb.co/yFLQp99c/image-1762409915252.jpg"></div>
+ <div class="logo-hex-inner"><img src="https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1762409915252.jpeg"></div>
  </div>
  <div class="hero-name"><span class="hn-baxto">BAXTO STYLE</span><span class="hn-tattoo">TATTOO</span></div>
  <div class="hero-sub">8 AÑOS DE EXPERIENCIA</div>
  <div style="font-size:10px;letter-spacing:.3em;color:rgba(160,200,255,.7);text-transform:uppercase;margin-bottom:15px;">Playa del Carmen · Quintana Roo</div>
  <div class="hero-phrase" id="phrase"></div>
  <div class="lily-avatar-wrap" onclick="openChat()">
- <img src="https://i.ibb.co/VY6vPvq9/avatar-lily.png" class="lily-avatar-img">
+ <img src="https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/avatar-lily.png" class="lily-avatar-img">
  <span class="lily-av-name">BRA GT</span>
  <span style="font-size:10px;letter-spacing:.15em;color:rgba(191,148,255,.6);">⚜️ Asistente IA · Toca para chatear</span>
  </div>
@@ -1415,11 +1415,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdha
 
 <script>
 const IMAGES = [
- { url: 'https://i.ibb.co/xq5vdPvG/In-Shot-20260318-153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
- { url: 'https://i.ibb.co/Y4zL61nH/In-Shot-20260318-154348790.jpg', label: 'Neo Tradicional · Color Vibrante · Aguja 7RL' },
- { url: 'https://i.ibb.co/whrgVx5C/In-Shot-20260318-161221693.jpg', label: 'Lettering · Script Fluido · Trazo Limpio' },
- { url: 'https://i.ibb.co/bRQc9tW5/In-Shot-20260318-161812794.jpg', label: 'Custom Design · Alma Artística' },
- { url: 'https://i.ibb.co/RGGFjR1d/In-Shot-20260318-162704690.jpg', label: 'Realismo · Sombra y Textura' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_153716186.jpg', label: 'Blackwork · Rigor Técnico · Dynamic Triple Black' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_154348790.jpg', label: 'Neo Tradicional · Color Vibrante · Aguja 7RL' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_161221693.jpg', label: 'Lettering · Script Fluido · Trazo Limpio' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_161812794.jpg', label: 'Custom Design · Alma Artística' },
+ { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/InShot_20260318_162704690.jpg', label: 'Realismo · Sombra y Textura' },
  { url: 'https://raw.githubusercontent.com/cherryv1/-BLACK-LILY-/main/public/img/image_1773541647082.jpeg', label: 'Dark Art Fusion · Cyberpunk Soul' }
 ];
 const INFO_CONTENT = {
@@ -1486,9 +1486,10 @@ async function enviarCotizacion(formId) {
     const uploadRes = await fetch('/api/upload-image', { method: 'POST', body: formData });
     const uploadData = await uploadRes.json();
     if (!uploadData.url) throw new Error('Upload falló');
+    const phoneId = getPhoneId();
     const res = await fetch('/api/analyze-image', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'X-Session-Id': phoneId},
       body: JSON.stringify({image_url: uploadData.url})
     });
     const data = await res.json();
@@ -1521,10 +1522,15 @@ async function enviarCotizacion(formId) {
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           message: \`[Contexto: Cliente \${nombre} tiene imagen analizada. Diseño: \${a.descripcion}, estilo \${a.estilo}, \${cm||a.tamano_sugerido_cm}cm en \${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]\`,
+          history: chatHistory.slice(-10).map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.text })),
           phone: getPhoneId(),
           customer_id: getPhoneId()
         })
       });
+      const imgData = await (await fetch('/api/chat', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:\`[Analisis completado]\`,phone:getPhoneId()})})).json();
+      if (imgData.respuesta || imgData.reply) {
+        chatHistory.push({ role: 'bot', text: imgData.respuesta||imgData.reply, time: Date.now() });
+      }
     } else {
       addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
     }

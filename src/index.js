@@ -447,7 +447,20 @@ async function chatWithMemory(env, sessionId, customerId, message) {
       }
       if (kvData.ultimoAnalisis) {
         const ua = kvData.ultimoAnalisis;
-        systemPrompt += `\n\nIMAGEN ANALIZADA POR VAN1: Cliente subió imagen de referencia. Diseño: ${ua.descripcion}. Estilo: ${ua.estilo}. Zona: ${ua.zona}. Tamaño: ${ua.cm}cm. NO pidas esta información de nuevo.`;
+        systemPrompt += `\n\nIMAGEN ANALIZADA POR VAN1: Cliente subió imagen de referencia. Diseño: ${ua.descripcion}. Estilo: ${ua.estilo}. Zona: ${ua.zona}. Tamaño: ${ua.cm}cm. NO pidas esta información de nuevo. Si el cliente pregunta qué imagen analizaste, descríbela con estos datos.`;
+      }
+      // También buscar en sess:customerId
+      if (!kvData.ultimoAnalisis) {
+        try {
+          const altKV = await env.SESSIONS.get(`sess:${customerId}`).catch(() => null);
+          if (altKV) {
+            const altData = JSON.parse(altKV);
+            if (altData.ultimoAnalisis) {
+              const ua = altData.ultimoAnalisis;
+              systemPrompt += `\n\nIMAGEN ANALIZADA POR VAN1: Diseño: ${ua.descripcion}. Estilo: ${ua.estilo}. Zona: ${ua.zona}. Tamaño: ${ua.cm}cm. NO pidas esta información de nuevo.`;
+            }
+          }
+        } catch(e) {}
       }
     }
   } catch(e) {}

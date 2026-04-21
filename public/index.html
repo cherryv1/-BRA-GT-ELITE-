@@ -233,6 +233,7 @@ async function enviarCotizacion(formId) {
       container.scrollTop = container.scrollHeight;
       await fetch('/api/chat', {
         method: 'POST',
+      chatHistory.push({ role: 'bot', text: `Analisis VAN1: ${a.descripcion}, ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}`, time: Date.now() });
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           message: `[Contexto: Cliente ${nombre} tiene imagen analizada. Diseño: ${a.descripcion}, estilo ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]`,

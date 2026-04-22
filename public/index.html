@@ -231,21 +231,10 @@ async function enviarCotizacion(formId) {
       </div>`;
       container.appendChild(resDiv);
       container.scrollTop = container.scrollHeight;
-      await fetch('/api/chat', {
-        method: 'POST',
-      chatHistory.push({ role: 'bot', text: `Analisis VAN1: ${a.descripcion}, ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}`, time: Date.now() });
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          message: `[Contexto: Cliente ${nombre} tiene imagen analizada. Diseño: ${a.descripcion}, estilo ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]`,
-          history: chatHistory.slice(-10).map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.text })),
-          phone: getPhoneId(),
-          customer_id: getPhoneId()
-        })
-      });
-      const imgData = await (await fetch('/api/chat', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`[Analisis completado]`,phone:getPhoneId()})})).json();
-      if (imgData.respuesta || imgData.reply) {
-        chatHistory.push({ role: 'bot', text: imgData.respuesta||imgData.reply, time: Date.now() });
-      }
+      // Inyectar análisis directo en chatHistory — BRA siempre lo verá
+      const analisisCtx = `[ANÁLISIS VAN1 COMPLETADO: Nombre cliente: ${nombre}. Diseño: ${a.descripcion}. Estilo: ${a.estilo}. Zona: ${zona||a.zona_sugerida}. Tamaño: ${cm||a.tamano_sugerido_cm}cm. Complejidad: ${a.complejidad}/10. Sugerencia: ${a.sugerencia_baxto}. NO vuelvas a pedir esta información.]`;
+      chatHistory.push({ role: 'user', text: analisisCtx, time: Date.now() });
+      chatHistory.push({ role: 'bot', text: `Perfecto ${nombre}, tengo todo el análisis de tu diseño. Es un ${a.descripcion} en estilo ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}. ¿Quieres cotizar o ver un mockup?`, time: Date.now() });
     } else {
       addMessage('bot', '❌ No pude analizar la imagen. Intenta con otra foto.');
     }

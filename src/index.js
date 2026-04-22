@@ -978,7 +978,12 @@ async function handleRequest(request, env) {
       const analysis = JSON.parse(clean);
       try {
         const body2 = await request.clone().json().catch(() => ({}));
-        const sessionId = request.headers.get('X-Session-Id') || body2.session_id || request.headers.get('X-Customer-Id') || 'anonymous';
+        let formSessionId = 'anonymous';
+        try {
+          const fd2 = await request.clone().formData();
+          formSessionId = fd2.get('session_id') || 'anonymous';
+        } catch(e) {}
+        const sessionId = request.headers.get('X-Session-Id') || formSessionId || body2.session_id || 'anonymous';
         const rawKV = await env.SESSIONS.get(`sess:${sessionId}`).catch(() => null);
         const kvData = rawKV ? JSON.parse(rawKV) : { messages: [] };
         kvData.ultimoAnalisis = {

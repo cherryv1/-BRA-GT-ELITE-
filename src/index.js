@@ -982,7 +982,7 @@ async function handleRequest(request, env) {
           const fd2 = await request.clone().formData();
           formSessionId = fd2.get('session_id') || 'anonymous';
         } catch(e) {}
-        const sessionId = request.headers.get('X-Session-Id') || formSessionId || 'anonymous';
+        const sessionId = request.headers.get('X-Customer-Id') || request.headers.get('X-Session-Id') || formSessionId || 'anonymous';
         const rawKV = await env.SESSIONS.get(`sess:${sessionId}`).catch(() => null);
         const kvData = rawKV ? JSON.parse(rawKV) : { messages: [] };
         kvData.ultimoAnalisis = {

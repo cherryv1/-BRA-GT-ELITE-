@@ -203,8 +203,8 @@ async function enviarCotizacion(formId) {
     const phoneId = getPhoneId();
     const res = await fetch('/api/analyze-image', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-Session-Id': phoneId},
-      body: JSON.stringify({image_url: uploadData.url})
+      headers: {'Content-Type': 'application/json', 'X-Customer-Id': phoneId},
+      body: JSON.stringify({image_url: uploadData.url, customer_id: phoneId})
     });
     const data = await res.json();
     van.style.display = 'none';

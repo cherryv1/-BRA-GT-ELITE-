@@ -980,7 +980,7 @@ async function handleRequest(request, env) {
         let formSessionId = 'anonymous';
         try {
           const fd2 = await request.clone().formData();
-          formSessionId = fd2.get('session_id') || 'anonymous';
+          formSessionId = fd2.get('customer_id') || fd2.get('session_id') || 'anonymous';
         } catch(e) {}
         const sessionId = request.headers.get('X-Customer-Id') || request.headers.get('X-Session-Id') || formSessionId || 'anonymous';
         const rawKV = await env.SESSIONS.get(`sess:${sessionId}`).catch(() => null);
@@ -1507,8 +1507,8 @@ async function enviarCotizacion(formId) {
     const phoneId = getPhoneId();
     const res = await fetch('/api/analyze-image', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-Session-Id': phoneId},
-      body: JSON.stringify({image_url: uploadData.url})
+      headers: {'Content-Type': 'application/json', 'X-Customer-Id': phoneId},
+      body: JSON.stringify({image_url: uploadData.url, customer_id: phoneId})
     });
     const data = await res.json();
     van.style.display = 'none';
@@ -1535,10 +1535,9 @@ async function enviarCotizacion(formId) {
       </div>\`;
       container.appendChild(resDiv);
       container.scrollTop = container.scrollHeight;
-      // Agregar análisis a chatHistory para que BRA lo recuerde
-      chatHistory.push({ role: 'assistant', text: 'Analice tu imagen: Diseno ' + a.descripcion + ', estilo ' + a.estilo + ', ' + (cm||a.tamano_sugerido_cm) + 'cm en ' + (zona||a.zona_sugerida) + '.', time: Date.now() });
       await fetch('/api/chat', {
         method: 'POST',
+      chatHistory.push({ role: 'bot', text: \`Analisis VAN1: \${a.descripcion}, \${a.estilo}, \${cm||a.tamano_sugerido_cm}cm en \${zona||a.zona_sugerida}\`, time: Date.now() });
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           message: \`[Contexto: Cliente \${nombre} tiene imagen analizada. Diseño: \${a.descripcion}, estilo \${a.estilo}, \${cm||a.tamano_sugerido_cm}cm en \${zona||a.zona_sugerida}. Cotizar directamente sin pedir datos de nuevo.]\`,

@@ -977,13 +977,12 @@ async function handleRequest(request, env) {
       const clean = rawText.replace(/```json|```/g, '').trim();
       const analysis = JSON.parse(clean);
       try {
-        const body2 = await request.clone().json().catch(() => ({}));
         let formSessionId = 'anonymous';
         try {
           const fd2 = await request.clone().formData();
           formSessionId = fd2.get('session_id') || 'anonymous';
         } catch(e) {}
-        const sessionId = request.headers.get('X-Session-Id') || formSessionId || body2.session_id || 'anonymous';
+        const sessionId = request.headers.get('X-Session-Id') || formSessionId || 'anonymous';
         const rawKV = await env.SESSIONS.get(`sess:${sessionId}`).catch(() => null);
         const kvData = rawKV ? JSON.parse(rawKV) : { messages: [] };
         kvData.ultimoAnalisis = {

@@ -1531,6 +1531,8 @@ async function enviarCotizacion(formId) {
       </div>\`;
       container.appendChild(resDiv);
       container.scrollTop = container.scrollHeight;
+      // Agregar análisis a chatHistory para que BRA lo recuerde
+      chatHistory.push({ role: 'assistant', text: 'Analice tu imagen: Diseno ' + a.descripcion + ', estilo ' + a.estilo + ', ' + (cm||a.tamano_sugerido_cm) + 'cm en ' + (zona||a.zona_sugerida) + '.', time: Date.now() });
       await fetch('/api/chat', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},

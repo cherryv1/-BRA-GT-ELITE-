@@ -573,7 +573,7 @@ async function chatWithMemory(env, sessionId, customerId, message) {
 
   // Limpiar texto
   finalText = finalText.replace(/\[[^\]]*\]/gi, '').trim();
-  finalText = finalText.replace(/[¿?][^\n]*$/gm, '').trim();
+  // finalText = finalText.replace(/[¿?][^\n]*$/gm, '').trim(); // DESACTIVADO — borraba preguntas del flujo
   finalText = finalText.replace(/(?:Puedes|puedes|Te recomiendo|comunic)[^\n]*/gm, '').trim();
   finalText = finalText.replace(/https?:\/\/wa\.me\/\S*/g, '').trim();
   finalText = finalText.replace(/^\* /gm, '• ');

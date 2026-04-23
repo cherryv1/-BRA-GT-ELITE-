@@ -232,7 +232,7 @@ async function enviarCotizacion(formId) {
       container.appendChild(resDiv);
       container.scrollTop = container.scrollHeight;
       // Inyectar análisis directo en chatHistory — BRA siempre lo verá
-      const analisisCtx = `[ANÁLISIS VAN1 COMPLETADO: Nombre cliente: ${nombre}. Diseño: ${a.descripcion}. Estilo: ${a.estilo}. Zona: ${zona||a.zona_sugerida}. Tamaño: ${cm||a.tamano_sugerido_cm}cm. Complejidad: ${a.complejidad}/10. Sugerencia: ${a.sugerencia_baxto}. NO vuelvas a pedir esta información.]`;
+      const analisisCtx = '[ANÁLISIS VAN1 COMPLETADO: Nombre cliente: ' + nombre + '. Diseño: ' + a.descripcion + '. Estilo: ' + a.estilo + '. Zona: ' + (zona||a.zona_sugerida) + '. Tamaño: ' + (cm||a.tamano_sugerido_cm) + 'cm. Complejidad: ' + a.complejidad + '/10. Sugerencia: ' + a.sugerencia_baxto + '. NO vuelvas a pedir esta información.]';
       chatHistory.push({ role: 'user', text: analisisCtx, time: Date.now() });
       chatHistory.push({ role: 'bot', text: `Perfecto ${nombre}, tengo todo el análisis de tu diseño. Es un ${a.descripcion} en estilo ${a.estilo}, ${cm||a.tamano_sugerido_cm}cm en ${zona||a.zona_sugerida}. ¿Quieres cotizar o ver un mockup?`, time: Date.now() });
     } else {

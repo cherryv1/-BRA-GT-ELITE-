@@ -1246,12 +1246,12 @@ function intentRouter(message) {
   }
 
   // Cotizar / precio genérico
-  if (/precio|costo|cuánto cobra|cuanto cobra|cuánto vale|cuanto vale/i.test(msg)) {
-    return {
-      reply: "Con gusto 🖤 Para darte el precio exacto necesito saber: qué diseño quieres, de cuántos centímetros y en qué parte del cuerpo.\n\nMientras tanto puedes escribirle directo a Baxto:\n\n👉 https://wa.me/5219842562365?text=Hola%20Baxto!%20Quiero%20cotizar%20un%20tatuaje.",
-      model: 'IntentRouter'
-    };
-  }
+  // DESACTIVADO — LLM maneja mejor con el flujo estructurado
+  // if (/precio|costo|cuánto cobra|cuanto cobra|cuánto vale|cuanto vale/i.test(msg)) {
+  //   return { reply: '...', model: 'IntentRouter' };
+  // }
+
+
 
   // Ubicación
   if (/dónde|donde|ubicación|ubicacion|dirección|direccion|domicilio|cómo llego|como llego/i.test(msg)) {
@@ -1262,20 +1262,20 @@ function intentRouter(message) {
   }
 
   // Promociones
-  if (/promo|descuento|oferta|rebaja|10%|diez por ciento/i.test(msg)) {
-    return {
-      reply: "Tenemos 10% OFF en tu primer tatuaje reservando con BRA GT 🖤 Baxto confirma el precio final.\n\n👉 https://wa.me/5219842562365?text=Hola%20Baxto!%20Vi%20la%20promo%20del%2010%25%20OFF.",
-      model: 'IntentRouter'
-    };
-  }
+  // DESACTIVADO — regla RLHF lo maneja
+  // if (/promo|descuento|oferta|rebaja|10%|diez por ciento/i.test(msg)) {
+  //   return { reply: '...', model: 'IntentRouter' };
+  // }
+
+
 
   // Horarios / disponibilidad
-  if (/horario|disponibilidad|cuándo|cuando|agenda|agendar|cita/i.test(msg)) {
-    return {
-      reply: "Los horarios los maneja Baxto directo según su agenda 🖤 Escríbele para coordinar:\n\n👉 https://wa.me/5219842562365?text=Hola%20Baxto!%20Quiero%20agendar%20una%20cita.",
-      model: 'IntentRouter'
-    };
-  }
+  // DESACTIVADO — regla RLHF lo maneja
+  // if (/horario|disponibilidad|cuándo|cuando|agenda|agendar|cita/i.test(msg)) {
+  //   return { reply: '...', model: 'IntentRouter' };
+  // }
+
+
 
   return null; // No hay match — pasa al LLM
 }

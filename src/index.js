@@ -325,7 +325,7 @@ async function checkBaxtoRules(env, message) {
     if (!rules.results.length) return null;
     const msg = message.toLowerCase().trim();
     for (const rule of rules.results) {
-      if (msg.includes(rule.trigger)) return rule.response;
+      if (msg === rule.trigger || new RegExp("\\b" + rule.trigger + "\\b","i").test(msg)) return rule.response;
     }
     return null;
   } catch(e) { return null; }
